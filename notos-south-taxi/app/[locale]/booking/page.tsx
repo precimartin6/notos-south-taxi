@@ -1,8 +1,7 @@
-import { getTranslations } from 'next-intl/server';
+import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import BookingForm from '@/components/BookingForm';
 import { DESTINATIONS } from '@/lib/site-config';
 import type { Locale } from '@/i18n';
-export const dynamic = 'force-dynamic';
 
 export default async function BookingPage({
   params: { locale },
@@ -11,6 +10,7 @@ export default async function BookingPage({
   params: { locale: Locale };
   searchParams: { from?: string; to?: string };
 }) {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations({ locale });
   // Provide localized destination options to the client form
   const destOptions = [

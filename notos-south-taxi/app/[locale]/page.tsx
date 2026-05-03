@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { ArrowRight, Check, Clock, Map, ShieldCheck, Sparkles, Users } from 'lucide-react';
 import { DESTINATIONS, SITE, type Destination } from '@/lib/site-config';
@@ -7,9 +7,9 @@ import RotatingPhotos from '@/components/RotatingPhotos';
 import FleetSection from '@/components/FleetSection';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
 import type { Locale } from '@/i18n';
-export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params: { locale } }: { params: { locale: Locale } }) {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const featured = DESTINATIONS.filter((d) => d.featured);
 

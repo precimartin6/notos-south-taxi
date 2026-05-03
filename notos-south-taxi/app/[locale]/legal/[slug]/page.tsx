@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getTranslations, getMessages } from 'next-intl/server';
+import {getTranslations, getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n';
-export const dynamic = 'force-dynamic';
 
 const SLUGS = ['terms', 'privacy', 'cookies', 'cancellation'] as const;
 type Slug = (typeof SLUGS)[number];
@@ -31,6 +30,7 @@ export default async function LegalPage({
 }: {
   params: { locale: Locale; slug: string };
 }) {
+  unstable_setRequestLocale(locale);
   if (!SLUGS.includes(slug as Slug)) notFound();
   const s = slug as Slug;
 

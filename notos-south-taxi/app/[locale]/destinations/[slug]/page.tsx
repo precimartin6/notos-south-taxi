@@ -1,16 +1,23 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import { DESTINATIONS, getDestination } from '@/lib/site-config';
 import { FIXED_ROUTES } from '@/lib/pricing';
 import type { Locale } from '@/i18n';
-export const dynamic = 'force-dynamic';
+
+export function generateStaticParams() {
+  return DESTINATIONS.flatMap((d) => [
+    { locale: 'en', slug: d.slug },
+    { locale: 'el', slug: d.slug }
+  ]);
+}
 
 export default async function DestinationPage({
   params: { locale, slug }
 }: {
   params: { locale: Locale; slug: string };
 }) {
+  unstable_setRequestLocale(locale);
   const d = getDestination(slug);
   if (!d) notFound();
   const t = await getTranslations({ locale });

@@ -1,0 +1,146 @@
+{
+  "nav": {
+    "home": "Home",
+    "destinations": "Destinations",
+    "services": "Services",
+    "tours": "Tours",
+    "about": "About",
+    "contact": "Contact",
+    "book": "Book"
+  },
+  "hero": {
+    "eyebrow": "Athenian Riviera taxi · Vouliagmeni · Alimos Marina",
+    "title": "Land in Athens. Your driver is waiting.",
+    "subtitle": "A licensed Athens taxi based on the Riviera, for transfers, day tours, and the long roads — Sounion, Delphi, Meteora, Kalamata. English spoken. On time, every time.",
+    "ctaBook": "Plan your ride",
+    "ctaCall": "Call now",
+    "trust1": "Licensed Athens driver",
+    "trust2": "Fixed prices, no surprises",
+    "trust3": "Free cancellation 24h before"
+  },
+  "popular": {
+    "title": "Where we go",
+    "subtitle": "From Athens International Airport to the rest of Greece. Fixed, all-inclusive prices.",
+    "viewAll": "See every destination",
+    "from": "from",
+    "bookRoute": "Plan this ride"
+  },
+  "services": {
+    "title": "What we do",
+    "subtitle": "Whatever the trip, we have a vehicle and a plan.",
+    "items": {
+      "transfer": {
+        "title": "Airport & port transfers",
+        "body": "Door-to-door, with flight tracking and a name-sign at arrivals. We wait if you're delayed."
+      },
+      "h24": {
+        "title": "Around the clock",
+        "body": "Day, night, public holidays, 4 a.m. ferries — book any time, we'll be there."
+      },
+      "tours": {
+        "title": "One-day journeys",
+        "body": "Sounion, Delphi, Mycenae, Nafplio — full-day private tours from Athens, at your pace."
+      },
+      "sightseeing": {
+        "title": "Athens by taxi",
+        "body": "A half-day private circuit of the Acropolis, Plaka, and the historic centre."
+      },
+      "vans": {
+        "title": "Groups & families",
+        "body": "Mini-vans for up to 8, full vans up to 24 for tour groups. Child seats on request."
+      },
+      "corporate": {
+        "title": "Business & events",
+        "body": "Conference shuttles, hotel pickups, multi-stop schedules — discreet and on time."
+      }
+    }
+  },
+  "form": {
+    "title": "Plan your ride",
+    "subtitle": "A quote in under a minute. We hold your seat with a small online deposit; the rest you settle with the driver, in cash.",
+    "from": "Pickup",
+    "to": "Drop-off",
+    "selectFrom": "Choose pickup…",
+    "selectTo": "Choose destination…",
+    "customAddress": "Type an address",
+    "customAddressPlaceholder": "Start typing — we'll find it",
+    "pickupDate": "Date & time",
+    "passengers": "Passengers",
+    "luggage": "Luggage pieces",
+    "bigLuggage": "Oversize luggage",
+    "childSeats": "Child seats",
+    "vehicle": "Vehicle",
+    "vehicles": {
+      "taxi": "Taxi (up to 4)",
+      "station_wagon": "Station wagon (up to 4 + extra luggage)",
+      "van": "Mini-van (up to 8)",
+      "coach": "Group coach (up to 24)"
+    },
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone (with country code)",
+    "flightNumber": "Flight number (optional)",
+    "notes": "Notes for the driver (optional)",
+    "termsLink": "terms",
+    "privacyLink": "privacy notice",
+    "cancellationLink": "cancellation policy",
+    "getQuote": "Show me the price",
+    "submit": "Confirm with deposit",
+    "quote": {
+      "total": "Total fare",
+      "deposit": "Online today (15%)",
+      "remainder": "Cash on arrival (85%)",
+      "noShows": "We hold your seat with a small online deposit. Free cancellation up to 24 hours before pickup — no questions asked."
+    },
+    "errors": {
+      "required": "Please fill in all required fields.",
+      "submit": "Something went wrong. Please try again or call us."
+    }
+  },
+  "destinations": {
+    "title": "Where we go",
+    "subtitle": "Fixed, all-inclusive prices to the destinations our travellers ask for most. Anywhere else? Just type the address."
+  },
+  "footer": {
+    "tagline": "Licensed Athens taxi for transfers, day tours, and sightseeing.",
+    "rights": "All rights reserved.",
+    "find": "Find us",
+    "legal": "Legal",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Notice",
+    "cookies": "Cookie Policy",
+    "cancellation": "Cancellation Policy",
+    "data_controller": "Data Controller: Martin Preci"
+  },
+  "cookies": {
+    "text": "We use only essential cookies needed for your booking and language choice. No tracking, no advertising.",
+    "accept": "OK"
+  },
+  "booking": {
+    "successTitle": "You're all set",
+    "successProcessing": "Confirming your payment…",
+    "successBody": "Thanks {name} — booking {id} is confirmed. Your driver has been notified by WhatsApp and will message you before pickup. The remaining 85% (€{remainder}) is paid in cash on the day.",
+    "successCta": "Back to home",
+    "pendingTitle": "Just a moment",
+    "pendingBody": "Your payment is being verified. This page will update on its own — please don't close it for the next minute or so."
+  },
+  "legal": {
+    "termsTitle": "Terms & Conditions",
+    "termsBody": "<h2>1. Service</h2><p>Notos South Taxi (operated by Martin Preci, hereinafter \"the Operator\") provides licensed taxi and private transfer services in Athens and across Greece.</p><h2>2. Booking & payment</h2><p>To confirm a booking, the Customer pays a deposit equal to 15% of the agreed fare via Viva Wallet. The remaining 85% is paid in cash to the driver on the day of service.</p><h2>3. Advance notice for vans & coaches</h2><p>Bookings for vans (up to 8) and coaches (up to 24) require at least 1 hour notice before the pickup time. For shorter notice please call or message the Operator directly.</p><h2>4. Cancellation policy</h2><p>Bookings cancelled at least 24 hours before the pickup time are eligible for a full refund of the deposit. Cancellations made within 24 hours of pickup, or no-shows, forfeit the 15% deposit. The Operator may cancel a booking in cases of force majeure and will refund the full deposit.</p><h2>5. Pricing</h2><p>Fixed-route prices are all-inclusive. Custom destinations are quoted using a base fare plus per-kilometre rate, with a minimum fare of €15. Surcharges apply for vehicle type, child seats, oversize luggage, and night-time pickup (00:00–05:00).</p><h2>6. Liability</h2><p>The Operator carries the insurance required by Greek law. Liability for delays caused by traffic, weather, or third parties is limited to the cost of the booking.</p><h2>7. Lost items</h2><p>The Operator will help recover items left in the vehicle, but is not responsible for personal belongings.</p><h2>8. Governing law</h2><p>These terms are governed by Greek law. Disputes are subject to the courts of Athens.</p>",
+    "privacyTitle": "Privacy Notice (GDPR)",
+    "privacyBody": "<h2>1. Data Controller</h2><p>Martin Preci, Apollonos 10, Vouliagmeni 166 71, Greece. Contact: <a href='mailto:precimartin4@gmail.com'>precimartin4@gmail.com</a>.</p><h2>2. Data we collect</h2><p>To process a booking we collect: full name, email, phone number, pickup/drop-off addresses, date and time, optional flight number, payment confirmation reference. We do not store payment card details — these are handled directly by Viva Wallet (PCI-DSS compliant).</p><h2>3. Purpose & legal basis</h2><p>Performance of the transport contract (Art. 6(1)(b) GDPR). The driver receives a WhatsApp message via SendZen with the booking details so the trip can be performed.</p><h2>4. Retention</h2><p>Booking data is automatically deleted within 24 hours after the completion of the trip. Accounting records (proof of payment) are kept for the period required by Greek tax law (currently 5 years), without operational personal data.</p><h2>5. Recipients</h2><p>Viva Wallet (payment processing), SendZen (WhatsApp notification to the driver), Geoapify and Google Maps (address autocomplete and distance calculation if you enter a custom address).</p><h2>6. Your rights</h2><p>Access, rectification, erasure, restriction, portability, objection, and the right to lodge a complaint with the Hellenic Data Protection Authority (<a href='https://www.dpa.gr'>www.dpa.gr</a>).</p><h2>7. Cookies</h2><p>Only essential cookies are used. No analytics, no advertising trackers.</p>",
+    "cookiesTitle": "Cookie Policy",
+    "cookiesBody": "<p>This site uses only essential cookies required to keep your booking session active and to remember your language choice. We do not use any analytics, advertising, or tracking cookies. No cookies are shared with third parties.</p>",
+    "cancellationTitle": "Cancellation Policy",
+    "cancellationBody": "<p>Free cancellation when made at least 24 hours before the pickup time — full refund of the 15% deposit, no questions asked.</p><p>Cancellations made less than 24 hours before pickup, or no-shows, forfeit the 15% deposit; this clause is explicitly accepted at booking time.</p><p>If we cancel for reasons of force majeure (weather, accident, vehicle issue) you receive a full refund of the deposit and we will help you arrange an alternative.</p>"
+  },
+  "about": {
+    "title": "About",
+    "body": "Notos South Taxi is a licensed, owner-operated Athens taxi service run by Martin Preci — based on the Athenian Riviera, with stands at Vouliagmeni and Alimos Marina, available 24 hours a day, seven days a week. Years behind the wheel across Attica and the rest of Greece, comfortable English, and on time every time. Standard taxi for couples and small families, taxi-van for groups, full coach for tour parties — same driver, same care. We hold your seat with a small online deposit so prices stay honest and no-shows don't ruin anyone's trip; the rest is paid in cash to the driver, the way taxis have always worked."
+  },
+  "serviceArea": {
+    "title": "Where we pick up",
+    "subtitle": "Our home turf is the Athenian Riviera. We also collect from across Attica and run the long roads anywhere in Greece.",
+    "neighbourhoods": ["Vouliagmeni", "Voula", "Glyfada", "Alimos", "Marina Alimou", "Plateia Eleftherias", "Plateia Katraki", "Paleo Faliro", "Koropi", "Piraeus", "Athens Airport"]
+  }
+}

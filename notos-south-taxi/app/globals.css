@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: theme('colors.notos.paper');
+  color: theme('colors.notos.ink');
+  font-family: var(--font-body);
+  font-feature-settings: 'ss01','cv11';
+}
+
+.font-display { font-family: var(--font-display); font-feature-settings: 'ss01'; letter-spacing: -0.02em; }
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-notos-yellow px-6 py-3 font-semibold text-notos-blue-deep transition hover:bg-notos-yellow-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-notos-blue;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-notos-blue/15 bg-white px-6 py-3 font-semibold text-notos-blue-deep transition hover:border-notos-blue/40;
+}
+.input {
+  @apply w-full rounded-xl border border-notos-blue/15 bg-white px-4 py-3 text-notos-ink placeholder:text-notos-ink/40 focus:border-notos-blue focus:outline-none focus:ring-2 focus:ring-notos-blue/20;
+}
+.label { @apply mb-1.5 block text-sm font-medium text-notos-blue-deep; }
+
+/* Subtle Greek-key bottom border on hero */
+.greek-key-border {
+  background-image: linear-gradient(90deg, transparent 0 0), 
+    repeating-linear-gradient(90deg, theme('colors.notos.blue') 0 14px, transparent 14px 18px, theme('colors.notos.blue') 18px 24px, transparent 24px 28px);
+  background-repeat: no-repeat;
+  background-size: 100% 1px, 100% 4px;
+  background-position: bottom left, bottom left;
+}

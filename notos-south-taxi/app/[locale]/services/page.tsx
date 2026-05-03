@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { ShieldCheck, Clock, Map, Sparkles, Users } from 'lucide-react';
 import type { Locale } from '@/i18n';
+export const dynamic = 'force-dynamic';
 
 export default async function ServicesPage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale });

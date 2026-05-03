@@ -1,16 +1,11 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { DESTINATIONS, getDestination } from '@/lib/site-config';
 import { FIXED_ROUTES } from '@/lib/pricing';
 import type { Locale } from '@/i18n';
-
-export function generateStaticParams() {
-  return DESTINATIONS.flatMap((d) => [
-    { locale: 'en', slug: d.slug },
-    { locale: 'el', slug: d.slug }
-  ]);
-}
+export const dynamic = 'force-dynamic';
 
 export default async function DestinationPage({
   params: { locale, slug }

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations, getMessages } from 'next-intl/server';
 import type { Locale } from '@/i18n';
+export const dynamic = 'force-dynamic';
 
 const SLUGS = ['terms', 'privacy', 'cookies', 'cancellation'] as const;
 type Slug = (typeof SLUGS)[number];

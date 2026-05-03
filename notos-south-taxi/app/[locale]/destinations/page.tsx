@@ -4,6 +4,7 @@ import { DESTINATIONS } from '@/lib/site-config';
 import { FIXED_ROUTES } from '@/lib/pricing';
 import RotatingPhotos from '@/components/RotatingPhotos';
 import type { Locale } from '@/i18n';
+export const dynamic = 'force-dynamic';
 
 export default async function DestinationsIndex({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale });

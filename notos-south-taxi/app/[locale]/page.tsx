@@ -7,6 +7,7 @@ import RotatingPhotos from '@/components/RotatingPhotos';
 import FleetSection from '@/components/FleetSection';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
 import type { Locale } from '@/i18n';
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params: { locale } }: { params: { locale: Locale } }) {
   const t = await getTranslations({ locale });

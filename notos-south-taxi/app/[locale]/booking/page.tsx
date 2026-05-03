@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import BookingForm from '@/components/BookingForm';
 import { DESTINATIONS } from '@/lib/site-config';
 import type { Locale } from '@/i18n';
+export const dynamic = 'force-dynamic';
 
 export default async function BookingPage({
   params: { locale },

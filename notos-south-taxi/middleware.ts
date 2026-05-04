@@ -9,8 +9,7 @@ const intlMiddleware = createMiddleware({
 });
 
 export default function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith('/api/viva-webhook') ||
-      req.nextUrl.pathname.startsWith('/api/get-viva-key')) {
+  if (req.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 

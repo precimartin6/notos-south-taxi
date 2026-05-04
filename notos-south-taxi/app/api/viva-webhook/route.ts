@@ -15,11 +15,11 @@ import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 
 export async function GET() {
   const key = process.env.VIVA_WEBHOOK_VERIFICATION_KEY;
+  if (!key) return NextResponse.json({ error: 'no_key' }, { status: 500 });
 
-  if (!key) {
-    console.error('[viva-webhook] VIVA_WEBHOOK_VERIFICATION_KEY is not set');
-    return NextResponse.json({ error: 'no_key' }, { status: 500 });
-  }
+  // Viva expects JSON with a "Key" field
+  return NextResponse.json({ Key: key });
+}
 
   // Viva expects the key back as plain text — NOT JSON
   return new Response(key, {

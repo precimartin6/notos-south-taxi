@@ -1,5 +1,8 @@
 import createMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from './i18n';
+// ⚠️  Import from routing.ts — NOT from i18n.ts.
+// i18n.ts imports 'next-intl/server' and 'next/navigation' which are
+// server-only and will crash the Edge runtime that middleware runs on.
+import { locales, defaultLocale } from './routing';
 
 export default createMiddleware({
   locales,

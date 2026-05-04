@@ -18,47 +18,47 @@ import type { Locale } from '@/i18n';
 const REVIEWS: { quote: { en: string; el: string }; name: string; origin?: string; stars: 1|2|3|4|5 }[] = [
   {
     quote: {
-      en: "Martin met us right at the arrivals gate with a sign, helped with our luggage, and got us to the hotel in Plaka before we knew it. English was perfect, car was spotless. Already booked him for the trip back to the airport.",
-      el: "Ο Μάρτιν μας περίμενε στις αφίξεις με την ταμπέλα, βοήθησε με τις βαλίτσες και μας πήγε στο ξενοδοχείο στην Πλάκα γρήγορα και άνετα. Άψογα Αγγλικά, καθαρό αμάξι. Ήδη κλείσαμε και την επιστροφή."
+      en: "Excellent service. Very friendly guide who showed me everything about Athens. Always punctual, offered many services. I'm grateful Greece has such professionals.",
+      el: "Εξαιρετική υπηρεσία. Πολύ φιλικός οδηγός που μου έδειξε τα πάντα για την Αθήνα. Πάντα στην ώρα του, πρόσφερε πολλές υπηρεσίες. Χαίρομαι που η Ελλάδα έχει τέτοιους επαγγελματίες"
     },
-    name: 'Sarah',
-    origin: 'United Kingdom',
+    name: 'Arisfaerio',
+    origin: 'Greece',
     stars: 5
   },
   {
     quote: {
-      en: "We did the day trip to Sounion at sunset and Martin made the whole thing easy. He waited while we walked around the temple and even suggested a great taverna on the way back. Best 90 euros we spent in Greece.",
-      el: "Κάναμε ολοήμερη εκδρομή στο Σούνιο στο ηλιοβασίλεμα και ο Μάρτιν τα κανόνισε όλα. Περίμενε όσο περπατούσαμε στον ναό και πρότεινε και μια υπέροχη ταβέρνα στην επιστροφή. Τα καλύτερα 90 ευρώ που ξοδέψαμε στην Ελλάδα."
+      en: "Excellent driver, waited until I got inside my house before leaving!!!!",
+      el: "Εξαιρετικός οδηγός, περίμενε μέχρι να μπω και στο σπίτι και μετά έφυγε!!!!"
     },
-    name: 'David',
-    origin: 'Australia',
+    name: 'Veatriki Papadopoulou',
+    origin: 'Greece',
     stars: 5
   },
   {
     quote: {
-      en: "Booked the airport transfer at 4am for an early flight — Martin showed up exactly on time, drove safely, and didn't try to chat us up at that hour. Reliable, fair price, no nonsense. Highly recommend.",
-      el: "Κλείσαμε ταξί στις 4 το πρωί για πρωινή πτήση — ο Μάρτιν έφτασε ακριβώς στην ώρα του, οδηγούσε προσεκτικά και δεν προσπάθησε να μας πιάσει κουβέντα τέτοια ώρα. Αξιόπιστος, δίκαιη τιμή, χωρίς εκπλήξεις. Συστήνεται."
+      en: "Impeccable driver, polite, with great morals. The car is in excellent condition, comfortable and clean!",
+      el: "Άψογος οδηγός, ευγενέστατος, με τρομερό ήθος. Το αυτοκίνητο σε άριστη κατάσταση, άνετο και καθαρό!"
     },
-    name: 'Anna',
-    origin: 'Germany',
+    name: 'Αντζελ Μπιν',
+    origin: 'Greece',
     stars: 5
   },
   {
     quote: {
-      en: "We were a group of six heading to Meteora and Martin organised the whole two-day trip — driver, hotel suggestions, even where to eat. Felt like a friend showing us around, not a service. Genuinely lovely guy.",
-      el: "Ήμασταν παρέα έξι ατόμων για Μετέωρα και ο Μάρτιν οργάνωσε όλη τη διήμερη εκδρομή — οδηγός, ξενοδοχεία, ακόμη και που να φάμε. Ένιωθες σαν φίλος να σε ξεναγεί, όχι σαν υπηρεσία. Πολύ καλό παιδί."
+      en: "Great driver. Very enjoyable during the drive. On time and waited for me to return me back",
+      el: "Υπέροχος οδηγός. Πολύ ευχάριστος κατά τη διαδρομή. Στην ώρα του και περίμενε να με επιστρέψει"
     },
-    name: 'Marco',
-    origin: 'Italy',
+    name: 'Xhaferr Cakoni',
+    origin: 'Greece',
     stars: 5
   },
   {
     quote: {
-      en: "Honest, professional, and patient with our two small kids. Child seats were ready, water for the kids, even helped us figure out the metro tickets for later. Will use again.",
-      el: "Έντιμος, επαγγελματίας, υπομονετικός με τα δύο μικρά μας. Παιδικά καθίσματα έτοιμα, νερό για τα παιδιά, μας βοήθησε ακόμη και με τα εισιτήρια του μετρό για μετά. Θα τον ξαναχρησιμοποιήσουμε."
+      en: "Punctuality, humour and above all cleanliness!! Highly recommended!!",
+      el: "Συνέπεια, χιούμορ και προπάντων καθαριότητα!! Συνιστώ ανεπιφύλακτα!!"
     },
-    name: 'Christine',
-    origin: 'France',
+    name: 'Αθηνά Σιμάκου',
+    origin: 'Greece',
     stars: 5
   }
 ];
@@ -99,7 +99,7 @@ export default function ReviewsCarousel({ locale }: { locale: Locale }) {
       </div>
 
       {/* The quote — fade animation between reviews */}
-      <div ref={cardRef} className="relative min-h-[260px] sm:min-h-[220px]">
+      <div ref={cardRef} className="relative min-h-[320px] sm:min-h-[320px]">
         {REVIEWS.map((review, i) => (
           <div
             key={i}

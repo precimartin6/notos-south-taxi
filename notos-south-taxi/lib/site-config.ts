@@ -170,9 +170,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Περπατήστε ανάμεσα στις κολώνες του Ναού του Απόλλωνα και στο βήμα του Αποστόλου Παύλου. Συνδυάζεται με τη Διώρυγα και τις Μυκήνες για ολοήμερη εκδρομή.'
     },
     images: [
-      '/photos/destinations/corinth-3.jpg',
-      '/photos/destinations/corinth-1.jpg',
-      '/photos/destinations/corinth-2.jpg'
+      '/photos/destinations/ancient-corinth-3.jpg',
+      '/photos/destinations/ancient-corinth-1.jpg',
+      '/photos/destinations/ancient-corinth-2.jpg'
     ],
     featured: true,
     coords: { lat: 37.9061, lng: 22.8794 }

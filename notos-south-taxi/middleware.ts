@@ -1,15 +1,22 @@
 import createMiddleware from 'next-intl/middleware';
-// ⚠️  Import from routing.ts — NOT from i18n.ts.
-// i18n.ts imports 'next-intl/server' and 'next/navigation' which are
-// server-only and will crash the Edge runtime that middleware runs on.
 import { locales, defaultLocale } from './routing';
+import { NextRequest, NextResponse } from 'next/server';
 
-export default createMiddleware({
+const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always'
+  localePrefix: 'always',
 });
 
+export default function middleware(req: NextRequest) {
+  // Bypass everything for the Viva webhook
+  if (req.nextUrl.pathname.startsWith('/api/viva-webhook')) {
+    return NextResponse.next();
+  }
+
+  return intlMiddleware(req);
+}
+
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+  matcher: ['/((?!_next|_vercel|.*\\..*).*)'],
 };

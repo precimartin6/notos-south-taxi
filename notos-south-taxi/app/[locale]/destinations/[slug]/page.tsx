@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
+import {getTranslations, setRequestLocale } from 'next-intl/server';
 import { DESTINATIONS, getDestination } from '@/lib/site-config';
 import { FIXED_ROUTES } from '@/lib/pricing';
 import type { Locale } from '@/i18n';
@@ -17,7 +17,7 @@ export default async function DestinationPage({
 }: {
   params: { locale: Locale; slug: string };
 }) {
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
   const d = getDestination(slug);
   if (!d) notFound();
   const t = await getTranslations({ locale });

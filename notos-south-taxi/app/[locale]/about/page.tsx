@@ -1,8 +1,8 @@
-import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
+import {getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n';
 
 export default async function AboutPage({ params: { locale } }: { params: { locale: Locale } }) {
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return (
     <section className="mx-auto max-w-3xl px-5 py-16 sm:px-8">

@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import {getTranslations, unstable_setRequestLocale } from 'next-intl/server';
+import {getTranslations, setRequestLocale } from 'next-intl/server';
 import { DESTINATIONS } from '@/lib/site-config';
 import { FIXED_ROUTES } from '@/lib/pricing';
 import RotatingPhotos from '@/components/RotatingPhotos';
 import type { Locale } from '@/i18n';
 
 export default async function DestinationsIndex({ params: { locale } }: { params: { locale: Locale } }) {
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return (

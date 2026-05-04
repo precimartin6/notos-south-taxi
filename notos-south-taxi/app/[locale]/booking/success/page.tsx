@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams, useParams } from 'next/navigation';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
-export default function SuccessPage() {
+function SuccessContent() {
   const t = useTranslations();
   const sp = useSearchParams();
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
 
-  // Viva will append `?t={transactionId}&s={state}&eventId={..}&eci={..}&orderCode={..}`
   const orderCode = sp.get('s') || sp.get('orderCode') || sp.get('t');
 
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -72,5 +71,17 @@ export default function SuccessPage() {
         )}
       </div>
     </section>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <section className="mx-auto max-w-2xl px-5 py-20 sm:px-8 text-center">
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-notos-blue" />
+      </section>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

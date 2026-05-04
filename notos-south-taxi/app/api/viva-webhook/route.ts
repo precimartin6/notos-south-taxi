@@ -12,7 +12,11 @@ import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 export async function GET() {
   const key = process.env.VIVA_WEBHOOK_VERIFICATION_KEY;
   if (!key) return NextResponse.json({ error: 'no_key' }, { status: 500 });
-  return NextResponse.json({ Key: key });
+  
+  return new Response(key, {
+    status: 200,
+    headers: { 'Content-Type': 'text/plain' },
+  });
 }
 
 export async function POST(req: NextRequest) {

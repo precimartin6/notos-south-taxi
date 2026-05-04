@@ -148,7 +148,7 @@ export default function ReviewsCarousel({ locale }: { locale: Locale }) {
             key={i}
             onClick={() => setCurrent(i)}
             aria-label={`Show review ${i + 1}`}
-            className={`h-2 rounded-full transition-all ${
+            className={`h-3.5 rounded-full transition-all ${
               i === current ? 'w-8 bg-notos-yellow' : 'w-1.5 bg-white/30 hover:bg-white/50'
             }`}
           />

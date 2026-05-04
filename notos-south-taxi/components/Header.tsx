@@ -29,12 +29,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-notos-blue/10 bg-notos-paper/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8">
-        <Link href={`/${locale}`} className="flex items-center gap-2.5">
-          <Logo />
-          <div className="leading-tight">
-            <div className="font-display text-lg font-bold text-notos-blue-deep">Notos South</div>
-            <div className="-mt-0.5 text-[11px] tracking-[0.16em] text-notos-blue/70">TAXI · ATHENS</div>
-          </div>
+        <Link href={`/${locale}`} className="flex items-center">
+          <img
+            src="/brand/notos-logo-new.png"
+            alt="Notos South Taxi"
+            className="h-14 w-auto object-contain"
+            width={300}
+            height={72}
+          />
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">

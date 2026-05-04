@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyWebhook } from '@/lib/integrations/viva';
-import { notifyDriverNewBooking } from '@/lib/integrations/sendzen';
+import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 
 /**
  * Viva sends a GET first (verification handshake) and then POSTs events.
@@ -21,8 +21,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  // Viva event payload shape:
-  // { EventTypeId: 1796, EventData: { OrderCode, MerchantTrns, ... }, Created, Url, Key }
   const eventTypeId = payload.EventTypeId;
   const orderCode = payload?.EventData?.OrderCode;
   if (!orderCode) return NextResponse.json({ ok: true });
@@ -36,27 +34,24 @@ export async function POST(req: NextRequest) {
   if (eventTypeId === 1796) {
     // Payment success
     await db.setStatus(booking.id, 'paid', { notifiedAt: new Date().toISOString() });
-    const driver = process.env.DRIVER_WHATSAPP_NUMBER;
-    if (driver) {
-      await notifyDriverNewBooking(driver, {
-        bookingRef: booking.id,
-        customerName: booking.customerName,
-        customerPhone: booking.customerPhone,
-        customerEmail: booking.customerEmail,
-        fromText: booking.fromText,
-        toText: booking.toText,
-        pickupAtIso: booking.pickupAtIso,
-        passengers: booking.passengers,
-        luggage: booking.luggage,
-        childSeats: booking.childSeats,
-        vehicle: booking.vehicle,
-        flightNumber: booking.flightNumber,
-        notes: booking.notes,
-        totalEUR: booking.totalEUR,
-        depositEUR: booking.depositEUR,
-        remainderEUR: booking.remainderEUR
-      });
-    }
+    await notifyDriverNewBooking('', {
+      bookingRef: booking.id,
+      customerName: booking.customerName,
+      customerPhone: booking.customerPhone,
+      customerEmail: booking.customerEmail,
+      fromText: booking.fromText,
+      toText: booking.toText,
+      pickupAtIso: booking.pickupAtIso,
+      passengers: booking.passengers,
+      luggage: booking.luggage,
+      childSeats: booking.childSeats,
+      vehicle: booking.vehicle,
+      flightNumber: booking.flightNumber,
+      notes: booking.notes,
+      totalEUR: booking.totalEUR,
+      depositEUR: booking.depositEUR,
+      remainderEUR: booking.remainderEUR
+    });
   } else if (eventTypeId === 1798) {
     // Transaction failed
     await db.setStatus(booking.id, 'cancelled');

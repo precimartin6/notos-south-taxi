@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
 import Header from '@/components/Header';
@@ -19,9 +19,7 @@ export default async function LocaleLayout({
   params: { locale: Locale };
 }) {
   if (!locales.includes(locale)) notFound();
-  // Tell next-intl which locale to use for this request — without this,
-  // getMessages() can't resolve and you get the runtime "Application error".
-  unstable_setRequestLocale(locale);
+  setRequestLocale(locale);
 
   const messages = await getMessages();
 

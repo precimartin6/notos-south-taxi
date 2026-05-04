@@ -142,13 +142,13 @@ export default function ReviewsCarousel({ locale }: { locale: Locale }) {
       </div>
 
       {/* Dot indicators — clickable */}
-      <div className="mt-2 flex gap-1.5">
+      <div className="mt-2 flex gap-2.5">
         {REVIEWS.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
             aria-label={`Show review ${i + 1}`}
-            className={`h-3.5 rounded-full transition-all ${
+            className={`h-1.5 rounded-full transition-all ${
               i === current ? 'w-8 bg-notos-yellow' : 'w-1.5 bg-white/30 hover:bg-white/50'
             }`}
           />

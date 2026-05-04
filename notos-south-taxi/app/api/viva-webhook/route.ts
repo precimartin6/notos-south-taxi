@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 
-export async function GET() {
-  const key = process.env.VIVA_WEBHOOK_VERIFICATION_KEY;
-  if (!key) return NextResponse.json({ error: 'no_key' }, { status: 500 });
-
-  // Viva expects JSON with a Key field
+export async function GET(req: NextRequest) {
+  const key = req.nextUrl.searchParams.get('Key');
+  if (!key) return NextResponse.json({ error: 'no_key' }, { status: 400 });
   return NextResponse.json({ Key: key });
 }
 

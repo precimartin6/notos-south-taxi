@@ -71,7 +71,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
             </h1>
             <p className="mt-5 max-w-xl text-lg text-notos-blue-deep/80">{t('hero.subtitle')}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href={`/${locale}/booking`} className="btn-primary bg-notos-blue-deep text-notos-yellow hover:bg-notos-blue">
+              <Link href={`/${locale}/booking`} className="inline-flex items-center gap-2 rounded-full bg-notos-blue-deep px-6 py-3 font-semibold text-notos-yellow transition hover:bg-notos-blue">
                 {t('hero.ctaBook')} <ArrowRight className="h-4 w-4" />
               </Link>
               <a href={`tel:${SITE.phone.replace(/\s/g, '')}`} className="btn-ghost">

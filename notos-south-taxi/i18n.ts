@@ -10,6 +10,7 @@ import { locales, type Locale } from './routing';
 export default getRequestConfig(async ({ locale }) => {
   if (!locales.includes(locale as Locale)) notFound();
   return {
+    locale,
     messages: (await import(`./messages/${locale}.json`)).default
   };
 });

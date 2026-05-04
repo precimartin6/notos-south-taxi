@@ -131,10 +131,9 @@ export async function createPaymentOrder(input: CreateOrderInput): Promise<Creat
   const data = JSON.parse(rawOrder) as { orderCode: number };
 
   return {
-    orderCode:   data.orderCode,
-    checkoutUrl: `${API_URL}/web/checkout?ref=${data.orderCode}`,
-  };
-}
+  orderCode:   data.orderCode,
+  checkoutUrl: `https://www.vivapayments.com/web/checkout?ref=${data.orderCode}`,
+};
 
 export function verifyWebhook(_payload: unknown): boolean {
   return true;

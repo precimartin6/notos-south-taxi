@@ -7,6 +7,8 @@ import { Menu, X, Phone, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { SITE } from '@/lib/site-config';
 
+const PHONE2 = '+30 698 451 1006';
+
 export default function Header() {
   const t = useTranslations('nav');
   const locale = useLocale();
@@ -14,11 +16,9 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   const otherLocale = locale === 'en' ? 'el' : 'en';
-  // Robust locale swap that works for /en, /en/foo, /en/foo/bar
   const switchedPath = pathname.replace(/^\/(en|el)(?=\/|$)/, `/${otherLocale}`);
 
   const linkBase = `/${locale}`;
-  // Note: no "Book" link in nav — there's a yellow CTA on the right doing that job
   const links = [
     { href: `${linkBase}`, label: t('home') },
     { href: `${linkBase}/destinations`, label: t('destinations') },
@@ -52,12 +52,20 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href={`tel:${SITE.phone.replace(/\s/g, '')}`}
-            className="hidden items-center gap-1.5 text-sm font-semibold text-notos-blue-deep xl:flex"
-          >
-            <Phone className="h-4 w-4" /> {SITE.phone}
-          </a>
+          <div className="hidden flex-col gap-0.5 xl:flex">
+            <a
+              href={`tel:${SITE.phone.replace(/\s/g, '')}`}
+              className="flex items-center gap-1.5 text-sm font-semibold text-notos-blue-deep"
+            >
+              <Phone className="h-4 w-4" /> {SITE.phone}
+            </a>
+            <a
+              href={`tel:${PHONE2.replace(/\s/g, '')}`}
+              className="flex items-center gap-1.5 text-sm font-semibold text-notos-blue-deep"
+            >
+              <Phone className="h-4 w-4" /> {PHONE2}
+            </a>
+          </div>
           <Link
             href={switchedPath}
             className="rounded-full border border-notos-blue/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-notos-blue-deep transition hover:border-notos-blue/50"
@@ -90,6 +98,12 @@ export default function Header() {
                 {l.label}
               </Link>
             ))}
+            <a href={`tel:${SITE.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 text-sm font-semibold text-notos-blue-deep">
+              <Phone className="h-4 w-4" /> {SITE.phone}
+            </a>
+            <a href={`tel:${PHONE2.replace(/\s/g, '')}`} className="flex items-center gap-2 text-sm font-semibold text-notos-blue-deep">
+              <Phone className="h-4 w-4" /> {PHONE2}
+            </a>
             <Link
               href={`/${locale}/booking`}
               onClick={() => setOpen(false)}
@@ -109,19 +123,5 @@ export default function Header() {
         </div>
       )}
     </header>
-  );
-}
-
-function Logo() {
-  return (
-    <span className="relative inline-flex h-10 w-10 overflow-hidden rounded-lg shadow-card">
-      <img
-        src="/brand/notos-logo-256.jpg"
-        alt="Notos Taxi Service"
-        className="h-full w-full object-cover"
-        width={40}
-        height={40}
-      />
-    </span>
   );
 }

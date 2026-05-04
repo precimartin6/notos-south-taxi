@@ -598,6 +598,7 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {t('submit')}
       </button>
+      <p className="mt-3 text-center text-xs text-notos-blue-deep/50">{t('quote.bookingFeeNote')}</p>
     </form>
   );
 }

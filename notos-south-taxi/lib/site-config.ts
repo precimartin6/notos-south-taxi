@@ -18,13 +18,13 @@ export const SITE = {
   email: 'precimartin4@gmail.com',
   locations: [
     {
-      label: { en: 'Vouliagmeni base', el: 'Έδρα Βουλιαγμένης' },
+      label: { en: 'Notos Taxi Service', el: 'Notos Taxi Service' },
       address: 'Apollonos 10, Vouliagmeni 166 71',
       addressEl: 'Απόλλωνος 10, Βουλιαγμένη 166 71',
       googleMapsUrl: 'https://share.google/Km4fcgcYlxyPJgPF3'
     },
     {
-      label: { en: 'Alimos Marina', el: 'Μαρίνα Αλίμου' },
+      label: { en: 'South Taxi Alimos', el: 'South Taxi Alimos' },
       address: 'Marina Alimou, Alimos 174 55',
       addressEl: 'Μαρίνα Αλίμου, Άλιμος 174 55',
       googleMapsUrl: 'https://share.google/XO897sw3sP83rENI4'
@@ -92,7 +92,7 @@ export const DESTINATIONS: Destination[] = [
     images: [
       '/photos/destinations/patra-1.jpg',
       '/photos/destinations/patra-2.jpg',
-      '/photos/destinations/patra-1.jpg'
+      '/photos/destinations/patra-3.jpg'
     ],
     featured: true,
     coords: { lat: 38.2466, lng: 21.7346 }
@@ -124,7 +124,7 @@ export const DESTINATIONS: Destination[] = [
     images: [
       '/photos/destinations/meteora-1.jpg',
       '/photos/destinations/meteora-2.jpg',
-      '/photos/destinations/meteora-1.jpg'
+      '/photos/destinations/meteora-3.jpg'
     ],
     featured: true,
     coords: { lat: 39.7058, lng: 21.6307 }
@@ -170,9 +170,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Περπατήστε ανάμεσα στις κολώνες του Ναού του Απόλλωνα και στο βήμα του Αποστόλου Παύλου. Συνδυάζεται με τη Διώρυγα και τις Μυκήνες για ολοήμερη εκδρομή.'
     },
     images: [
-      '/photos/destinations/corinth-3.jpg',
-      '/photos/destinations/corinth-1.jpg',
-      '/photos/destinations/corinth-2.jpg'
+      '/photos/destinations/ancient-corinth-3.jpg',
+      '/photos/destinations/ancient-corinth-1.jpg',
+      '/photos/destinations/ancient-corinth-2.jpg'
     ],
     featured: true,
     coords: { lat: 37.9061, lng: 22.8794 }
@@ -202,9 +202,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Μακριά, άνετη διαδρομή μέσα από τη Θεσσαλία προς τη συμπρωτεύουσα. Περιλαμβάνονται δύο στάσεις ξεκούρασης· οργανώνουμε τα διαλείμματα σύμφωνα με το πρόγραμμά σας.'
     },
     images: [
-      u('photo-1601972602288-3be527b4f18d'),
-      u('photo-1583309217394-d3b3a8a3b87b'),
-      u('photo-1611605698335-8b1569810432')
+      '/photos/destinations/thessaloniki-1.jpg',
+      '/photos/destinations/thessaloniki-2.jpg',
+      '/photos/destinations/thessaloniki-3.jpg'
     ],
     featured: true,
     coords: { lat: 40.6401, lng: 22.9444 }
@@ -218,9 +218,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Γραφική διέλευση της κεντρικής Ελλάδας μέσω της Εγνατίας Οδού, με προορισμό την παραλίμνια πόλη των Ιωαννίνων. Ιδανική στάση πορεία για Ζαγόρι ή σύνορα.'
     },
     images: [
-      u('photo-1545569310-d7058a2e57d6'),
-      u('photo-1564598519268-3e4ee5af322a'),
-      u('photo-1602176005760-3eaaff67dc91')
+      '/photos/destinations/ioannina-1.jpg',
+      '/photos/destinations/ioannina-2.jpg',
+      '/photos/destinations/ioannina-3.jpg'
     ],
     featured: false,
     coords: { lat: 39.6650, lng: 20.8537 }
@@ -234,9 +234,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Διακριτικό, εκλεπτυσμένο ψαροχώρι στον Αργολικό — το κοντινότερο σημείο της ηπειρωτικής ακτής στις Σπέτσες. Συνδυάζεται με water taxi στη μαρίνα.'
     },
     images: [
-      u('photo-1555993539-1732b0258235'),
-      u('photo-1602176005760-3eaaff67dc91'),
-      u('photo-1583309217394-d3b3a8a3b87b')
+      '/photos/destinations/porto-heli-1.jpg',
+      '/photos/destinations/porto-heli-2.jpg',
+      '/photos/destinations/porto-heli-3.jpg'
     ],
     featured: false,
     coords: { lat: 37.3220, lng: 23.1490 }
@@ -250,9 +250,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Απευθείας στην πύλη του πλοίου σας, με παρακολούθηση πτήσης ώστε να περιμένουμε σε καθυστερήσεις.'
     },
     images: [
-      u('photo-1602176005760-3eaaff67dc91'),
-      u('photo-1605713288610-a9f0c70a8fd4'),
-      u('photo-1601972602288-3be527b4f18d')
+      '/photos/destinations/piraeus-port-1.jpg',
+      '/photos/destinations/piraeus-port-2.jpg',
+      '/photos/destinations/piraeus-port-3.jpg'
     ],
     featured: false,
     coords: { lat: 37.9479, lng: 23.6361 }
@@ -266,9 +266,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Σύντομη διαδρομή 25 λεπτών από το αεροδρόμιο στο λιμάνι Ραφήνας. Ιδανικό αν πηγαίνετε στις Κυκλάδες.'
     },
     images: [
-      u('photo-1605713288610-a9f0c70a8fd4'),
-      u('photo-1602176005760-3eaaff67dc91'),
-      u('photo-1555993539-1732b0258235')
+      '/photos/destinations/rafina-port-1.jpg',
+      '/photos/destinations/rafina-port-2.jpg',
+      '/photos/destinations/rafina-port-3.jpg'
     ],
     featured: false,
     coords: { lat: 38.0228, lng: 24.0086 }
@@ -282,9 +282,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Ολοήμερη διαδρομή με στάση για φαγητό στην Αράχωβα. Περιμένουμε στον αρχαιολογικό χώρο.'
     },
     images: [
-      u('photo-1564598519268-3e4ee5af322a'),
-      u('photo-1545569310-d7058a2e57d6'),
-      u('photo-1591801093068-f7e5cdc4d9f6')
+      '/photos/destinations/delphi-1.jpg',
+      '/photos/destinations/delphi-2.jpg',
+      '/photos/destinations/delphi-3.jpg'
     ],
     featured: false,
     coords: { lat: 38.4824, lng: 22.5009 }
@@ -298,9 +298,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Κομψά βενετσιάνικα δρομάκια, τρία κάστρα, πύλη προς Μυκήνες και Επίδαυρο.'
     },
     images: [
-      u('photo-1601972602288-3be527b4f18d'),
-      u('photo-1591801093068-f7e5cdc4d9f6'),
-      u('photo-1611605698335-8b1569810432')
+      '/photos/destinations/nafplio-1.jpg',
+      '/photos/destinations/nafplio-2.jpg',
+      '/photos/destinations/nafplio-3.jpg'
     ],
     featured: false,
     coords: { lat: 37.5675, lng: 22.8056 }
@@ -314,9 +314,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Περπατήστε στην Πύλη των Λεόντων και τον τάφο του Αγαμέμνονα. Συνδυάζεται ιδανικά με το Ναύπλιο για ολοήμερη εκδρομή.'
     },
     images: [
-      u('photo-1591801093068-f7e5cdc4d9f6'),
-      u('photo-1564598519268-3e4ee5af322a'),
-      u('photo-1611605698335-8b1569810432')
+      '/photos/destinations/mycenae-1.jpg',
+      '/photos/destinations/mycenae-2.jpg',
+      '/photos/destinations/mycenae-3.jpg'
     ],
     featured: false,
     coords: { lat: 37.7307, lng: 22.7561 }
@@ -330,9 +330,9 @@ export const DESTINATIONS: Destination[] = [
       el: 'Απευθείας διαδρομή προς Χαλκίδα και τον πορθμό του Ευρίπου, όπου το ρεύμα αλλάζει κατεύθυνση πολλές φορές την ημέρα.'
     },
     images: [
-      u('photo-1583309217394-d3b3a8a3b87b'),
-      u('photo-1602176005760-3eaaff67dc91'),
-      u('photo-1601972602288-3be527b4f18d')
+      '/photos/destinations/chalkida-1.jpg',
+      '/photos/destinations/chalkida-2.jpg',
+      '/photos/destinations/chalkida-3.jpg'
     ],
     featured: false,
     coords: { lat: 38.4625, lng: 23.5944 }

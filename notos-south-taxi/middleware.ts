@@ -20,3 +20,12 @@ export default function middleware(req: NextRequest) {
 export const config = {
   matcher: ['/((?!_next|_vercel|.*\\..*).*)'],
 };
+
+export default function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname.startsWith('/api/viva-webhook') ||
+      req.nextUrl.pathname.startsWith('/api/get-viva-key')) {
+    return NextResponse.next();
+  }
+
+  return intlMiddleware(req);
+}

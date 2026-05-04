@@ -34,8 +34,8 @@ export default function Header() {
             src="/brand/notos-logo-new.png"
             alt="Notos South Taxi"
             className="h-14 w-auto object-contain"
-            width={200}
-            height={56}
+            width={300}
+            height={72}
           />
         </Link>
 

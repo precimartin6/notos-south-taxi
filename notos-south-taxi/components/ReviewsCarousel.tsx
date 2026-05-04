@@ -99,7 +99,7 @@ export default function ReviewsCarousel({ locale }: { locale: Locale }) {
       </div>
 
       {/* The quote — fade animation between reviews */}
-      <div ref={cardRef} className="relative min-h-[320px] sm:min-h-[220px]">
+      <div ref={cardRef} className="relative min-h-[320px] sm:min-h-[320px]">
         {REVIEWS.map((review, i) => (
           <div
             key={i}
@@ -142,7 +142,7 @@ export default function ReviewsCarousel({ locale }: { locale: Locale }) {
       </div>
 
       {/* Dot indicators — clickable */}
-      <div className="mt-2 flex gap-2.5">
+      <div className="mt-2 flex gap-1.5">
         {REVIEWS.map((_, i) => (
           <button
             key={i}

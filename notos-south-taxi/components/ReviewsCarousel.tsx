@@ -41,35 +41,35 @@ const REVIEWS: { quote: { en: string; el: string }; name: string; origin?: strin
     },
     name: 'Anna',
     origin: 'Germany',
-3    stars: 5
+    stars: 5
   },
   {
     quote: {
       en: "We were a group of six heading to Meteora and Martin organised the whole two-day trip — driver, hotel suggestions, even where to eat. Felt like a friend showing us around, not a service. Genuinely lovely guy.",
       el: "Ήμασταν παρέα έξι ατόμων για Μετέωρα και ο Μάρτιν οργάνωσε όλη τη διήμερη εκδρομή — οδηγός, ξενοδοχεία, ακόμη και που να φάμε. Ένιωθες σαν φίλος να σε ξεναγεί, όχι σαν υπηρεσία. Πολύ καλό παιδί."
     },
- 3   name: 'Marco',
-  3  origin: 'Italy',
-   3 stars: 5
-  },3
-  {3
-    3quote: {
-     3 en: "Honest, professional, and patient with our two small kids. Child seats were ready, water for the kids, even helped us figure out the metro tickets for later. Will use again.",
-      3el: "Έντιμος, επαγγελματίας, υπομονετικός με τα δύο μικρά μας. Παιδικά καθίσματα έτοιμα, νερό για τα παιδιά, μας βοήθησε ακόμη και με τα εισιτήρια του μετρό για μετά. Θα τον ξαναχρησιμοποιήσουμε."
-    },3
-    nam33e: 'Christine',
-    origi3n: 'France',
-    stars:3 5
-  }3
-];3
-3
-c3onst ROTATION_MS = 6000;
-33
-ex3port default function ReviewsCarousel({ locale }: { locale: Locale }) {
-  c3onst [current, setCurrent] = useState(0);
-  co3nst [paused, setPaused] = useState(false);
-  con3st cardRef = useRef<HTMLDivElement>(null);
-3
+    name: 'Marco',
+    origin: 'Italy',
+    stars: 5
+  },
+  {
+    quote: {
+      en: "Honest, professional, and patient with our two small kids. Child seats were ready, water for the kids, even helped us figure out the metro tickets for later. Will use again.",
+      el: "Έντιμος, επαγγελματίας, υπομονετικός με τα δύο μικρά μας. Παιδικά καθίσματα έτοιμα, νερό για τα παιδιά, μας βοήθησε ακόμη και με τα εισιτήρια του μετρό για μετά. Θα τον ξαναχρησιμοποιήσουμε."
+    },
+    name: 'Christine',
+    origin: 'France',
+    stars: 5
+  }
+];
+
+const ROTATION_MS = 6000;
+
+export default function ReviewsCarousel({ locale }: { locale: Locale }) {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
   // Rotate
   useEffect(() => {
     if (paused) return;
@@ -147,7 +147,7 @@ ex3port default function ReviewsCarousel({ locale }: { locale: Locale }) {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-3            aria-label={`Show review ${i + 1}`}
+            aria-label={`Show review ${i + 1}`}
             className={`h-1.5 rounded-full transition-all ${
               i === current ? 'w-8 bg-notos-yellow' : 'w-1.5 bg-white/30 hover:bg-white/50'
             }`}

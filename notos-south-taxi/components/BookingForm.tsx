@@ -346,7 +346,6 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
           selectPlaceholder={t('selectFrom')}
           customPlaceholder={t('customAddressPlaceholder')}
           customLabel={t('customAddress')}
-          excludeSlug={toSlug !== CUSTOM ? toSlug : undefined}
           locale={locale}
         />
         <PlaceField

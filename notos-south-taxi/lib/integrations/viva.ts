@@ -139,3 +139,56 @@ export async function createPaymentOrder(input: CreateOrderInput): Promise<Creat
 export function verifyWebhook(_payload: unknown): boolean {
   return true;
 }
+
+/**
+ * Look up the payment state of an orderCode directly with Viva.
+ * Used as a fallback when the webhook hasn't fired yet OR when our DB
+ * lost the booking (in-memory adapter loses state across Lambda invocations).
+ *
+ * Returns 'paid' if any successful transaction exists for the order,
+ * 'pending' if the order exists but has no successful transaction yet,
+ * 'failed' if it was attempted and failed, 'unknown' on errors.
+ */
+export async function checkOrderStatus(orderCode: number | string): Promise<'paid' | 'pending' | 'failed' | 'unknown'> {
+  if (!CLIENT_ID || !CLIENT_SECRET) return 'unknown';
+
+  try {
+    const token = await getAccessToken();
+    const res = await fetch(`${API_URL}/checkout/v2/transactions?orderCode=${orderCode}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      console.warn('[viva] order status check failed:', res.status);
+      return 'unknown';
+    }
+
+    const data = await res.json();
+    // The transactions endpoint returns either an array or { transactions: [...] }
+    const txns = Array.isArray(data) ? data : (data?.transactions || data?.Transactions || []);
+
+    if (!txns.length) return 'pending';
+
+    // statusId === 'F' (Finished) means success in Viva's vocabulary.
+    // 'E' = Error, 'A' = Authorized but not captured, 'X' = Refunded.
+    const anyPaid = txns.some((t: any) =>
+      t?.statusId === 'F' || t?.StatusId === 'F' || t?.status === 'F'
+    );
+    if (anyPaid) return 'paid';
+
+    const anyFailed = txns.some((t: any) =>
+      t?.statusId === 'E' || t?.StatusId === 'E' || t?.status === 'E'
+    );
+    if (anyFailed) return 'failed';
+
+    return 'pending';
+  } catch (err) {
+    console.warn('[viva] order status check threw:', err);
+    return 'unknown';
+  }
+}

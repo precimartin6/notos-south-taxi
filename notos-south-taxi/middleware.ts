@@ -39,6 +39,14 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Viva payment redirects: these come back WITHOUT a locale prefix.
+  // Redirect them to /en/... preserving all query params (orderCode, s, t, etc.).
+  if (pathname === '/booking/success' || pathname === '/booking/failure') {
+    const url = req.nextUrl.clone();
+    url.pathname = `/en${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
   if (isMaintenance()) {
     // Allow the maintenance page itself + SEO / favicon
     if (

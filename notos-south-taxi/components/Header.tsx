@@ -81,13 +81,22 @@ export default function Header() {
           </Link>
         </div>
 
-        <button
-          aria-label="Menu"
-          onClick={() => setOpen((v) => !v)}
-          className="rounded-full border border-notos-blue/15 p-2 lg:hidden"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <Link
+            href={switchedPath}
+            className="rounded-full border border-notos-blue/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-notos-blue-deep transition hover:border-notos-blue/50"
+            aria-label={`Switch to ${otherLocale === 'en' ? 'English' : 'Ελληνικά'}`}
+          >
+            {otherLocale === 'en' ? 'EN' : 'ΕΛ'}
+          </Link>
+          <button
+            aria-label="Menu"
+            onClick={() => setOpen((v) => !v)}
+            className="rounded-full border border-notos-blue/15 p-2"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -111,13 +120,6 @@ export default function Header() {
             >
               {t('book')}
               <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href={switchedPath}
-              onClick={() => setOpen(false)}
-              className="mt-2 inline-flex w-fit rounded-full border border-notos-blue/20 px-3 py-1 text-xs font-bold uppercase"
-            >
-              {otherLocale === 'en' ? 'EN' : 'ΕΛ'}
             </Link>
           </div>
         </div>

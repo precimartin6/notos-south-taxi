@@ -63,7 +63,7 @@ export default function MaintenancePage() {
           Brief maintenance
         </h1>
         <p style={{ color: 'rgba(6,36,90,0.78)', lineHeight: 1.55, marginBottom: 18 }}>
-          We're making a small update to the site. It will be back online shortly. For bookings or questions in the meantime, please call or message us directly — we're available 24/7.
+          We&apos;re making a small update to the site. It will be back online shortly. For bookings or questions in the meantime, please call or message us directly — we&apos;re available 24/7.
         </p>
 
         <div style={{ height: 1, background: 'rgba(6,36,90,0.1)', margin: '28px 0' }} />

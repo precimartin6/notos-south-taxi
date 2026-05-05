@@ -20,18 +20,21 @@ export interface QuoteResult {
   depositEUR: number;       // 15%
   remainderEUR: number;     // 85% paid in cash
   breakdown: { label: string; amountEUR: number }[];
-  source: 'fixed' | 'distance';
+  source: 'fixed' | 'distance' | 'call_for_quote';
   estimatedKm?: number;
 }
 
 /**
- * Fixed-price table (round trips priced separately if requested).
- * All prices in EUR for a STANDARD TAXI (4 pax, up to 3 luggage).
+ * Fixed-price table. All prices in EUR for a STANDARD TAXI (4 pax, up to 3 luggage).
  * Vehicle and extras multipliers applied on top.
  *
- * Edit these values to match what the client wants to charge.
+ * Keys are ALPHABETICALLY SORTED pairs so we only need one entry per pair
+ * (e.g. 'airport:athens-centre' covers both directions).
+ *
+ * The lookup function tries both orders: A:B and B:A.
  */
 export const FIXED_ROUTES: Record<string, number> = {
+  // ----- Airport routes -----
   'airport:athens-centre': 55,
   'airport:piraeus-port': 65,
   'airport:rafina-port': 45,
@@ -47,7 +50,42 @@ export const FIXED_ROUTES: Record<string, number> = {
   'airport:kalamata': 380,
   'airport:meteora': 440,
   'airport:ioannina': 520,
-  'airport:thessaloniki': 580
+  'airport:thessaloniki': 580,
+
+  // ----- Local neighbourhood routes (to/from airport implied by the lookup) -----
+  'airport:vouliagmeni': 50,
+  'airport:glyfada': 45,
+  'airport:alimos': 45,
+  'airport:piraeus': 60,
+
+  // ----- Common inter-city / neighbourhood routes -----
+  // Riviera ↔ Athens centre
+  'athens-centre:vouliagmeni': 35,
+  'athens-centre:glyfada': 25,
+  'athens-centre:alimos': 20,
+
+  // Riviera ↔ Piraeus
+  'piraeus:vouliagmeni': 30,
+  'piraeus:glyfada': 25,
+  'piraeus:alimos': 18,
+  'athens-centre:piraeus': 25,
+  'piraeus-port:vouliagmeni': 35,
+  'piraeus-port:glyfada': 28,
+  'piraeus-port:alimos': 22,
+  'piraeus-port:athens-centre': 28,
+
+  // Neighbourhood ↔ ports
+  'rafina-port:vouliagmeni': 55,
+  'rafina-port:glyfada': 50,
+  'rafina-port:alimos': 50,
+  'rafina-port:athens-centre': 40,
+
+  // Vouliagmeni/Glyfada ↔ destination routes
+  'vouliagmeni:sounio': 45,
+  'glyfada:sounio': 50,
+  'vouliagmeni:korinthos': 95,
+  'vouliagmeni:ancient-corinth': 90,
+  'glyfada:korinthos': 100,
 };
 
 /** Minimum fare floor for the standard taxi (vehicle multipliers apply on top). */
@@ -81,14 +119,29 @@ function isNight(iso: string) {
   return h >= 0 && h < 5;
 }
 
-function routeKey(from?: string, to?: string) {
+/**
+ * Build lookup key(s) and find the first match in FIXED_ROUTES.
+ * Tries both directions: A→B and B→A.
+ */
+function lookupFixedRoute(from?: string, to?: string): number | null {
   if (!from || !to) return null;
   const a = from.toLowerCase();
   const b = to.toLowerCase();
-  // Normalize "airport" both directions to a single key
-  if (a === 'airport') return `airport:${b}`;
-  if (b === 'airport') return `airport:${a}`;
-  return `${a}:${b}`;
+  if (a === b) return null; // same location
+
+  // Try: a:b, b:a, airport:X (both directions)
+  const candidates = [
+    `${a}:${b}`,
+    `${b}:${a}`,
+  ];
+  // Also normalise: if either side is 'airport', make sure we try airport:other
+  if (a === 'airport') candidates.push(`airport:${b}`);
+  if (b === 'airport') candidates.push(`airport:${a}`);
+
+  for (const key of candidates) {
+    if (FIXED_ROUTES[key] != null) return FIXED_ROUTES[key];
+  }
+  return null;
 }
 
 export function quote(req: QuoteRequest): QuoteResult {
@@ -97,26 +150,53 @@ export function quote(req: QuoteRequest): QuoteResult {
   let source: QuoteResult['source'] = 'fixed';
   let estimatedKm: number | undefined;
 
-  const key = routeKey(req.fromSlug, req.toSlug);
-  if (key && FIXED_ROUTES[key]) {
-    base = FIXED_ROUTES[key];
+  const fixedPrice = lookupFixedRoute(req.fromSlug, req.toSlug);
+
+  if (fixedPrice != null) {
+    base = fixedPrice;
     breakdown.push({ label: `Fixed route fare`, amountEUR: base });
   } else if (req.fromAddress && req.toAddress) {
     // distance-based fallback. The actual km comes from Google Maps in the API route.
-    // Here we just compute on whatever km the caller passed via custom_km.
     const km = (req as any).custom_km ?? 0;
-    estimatedKm = km;
-    base = BASE_FARE + km * PER_KM;
-    source = 'distance';
-    breakdown.push({ label: `Base fare`, amountEUR: BASE_FARE });
-    breakdown.push({ label: `${km.toFixed(1)} km × €${PER_KM}`, amountEUR: km * PER_KM });
+    if (km > 0) {
+      estimatedKm = km;
+      base = BASE_FARE + km * PER_KM;
+      source = 'distance';
+      breakdown.push({ label: `Base fare`, amountEUR: BASE_FARE });
+      breakdown.push({ label: `${km.toFixed(1)} km × €${PER_KM}`, amountEUR: km * PER_KM });
+    } else {
+      // No distance data available — can't price this route
+      return {
+        totalEUR: 0,
+        depositEUR: 0,
+        remainderEUR: 0,
+        breakdown: [{ label: 'Call for quote', amountEUR: 0 }],
+        source: 'call_for_quote'
+      };
+    }
+  } else if (req.fromSlug && req.toSlug) {
+    // Both slugs provided but no fixed route exists for this pair,
+    // and no custom addresses to compute distance from.
+    // Instead of returning a wrong €15, tell the UI to show "call for quote".
+    return {
+      totalEUR: 0,
+      depositEUR: 0,
+      remainderEUR: 0,
+      breakdown: [{ label: 'Call for quote', amountEUR: 0 }],
+      source: 'call_for_quote'
+    };
   } else {
-    base = BASE_FARE;
-    breakdown.push({ label: `Base fare`, amountEUR: BASE_FARE });
+    // No slugs and no addresses — shouldn't happen, but be safe
+    return {
+      totalEUR: 0,
+      depositEUR: 0,
+      remainderEUR: 0,
+      breakdown: [{ label: 'Call for quote', amountEUR: 0 }],
+      source: 'call_for_quote'
+    };
   }
 
-  // Minimum-fare floor: short rides snap up to the minimum so we don't
-  // dispatch a driver for less than this. Applied before vehicle/extras.
+  // Minimum-fare floor
   if (base < MIN_TAXI_FARE_EUR) {
     const bump = MIN_TAXI_FARE_EUR - base;
     breakdown.push({ label: `Minimum fare adjustment`, amountEUR: bump });

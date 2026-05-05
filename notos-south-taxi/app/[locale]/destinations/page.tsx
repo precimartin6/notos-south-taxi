@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {getTranslations, setRequestLocale } from 'next-intl/server';
 import { DESTINATIONS } from '@/lib/site-config';
-import { FIXED_ROUTES } from '@/lib/pricing';
+import { FIXED_ROUTES, extractDayPrice } from '@/lib/pricing';
 import RotatingPhotos from '@/components/RotatingPhotos';
 import type { Locale } from '@/i18n';
 
@@ -18,7 +18,7 @@ export default async function DestinationsIndex({ params: { locale } }: { params
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {DESTINATIONS.map((d, idx) => {
-          const price = FIXED_ROUTES[`airport:${d.slug}`];
+          const price = extractDayPrice(FIXED_ROUTES[`airport:${d.slug}`]);
           return (
             <Link key={d.slug} href={`/${locale}/destinations/${d.slug}`} className="group overflow-hidden rounded-2xl bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-lg">
               <div className="relative h-44 overflow-hidden">

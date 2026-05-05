@@ -28,6 +28,7 @@
   "services": {
     "title": "What we do",
     "subtitle": "Whatever the trip, we have a vehicle and a plan.",
+    "feesNote": "€3 call fee · €5 booking fee · minimum fare €15 · night rate (midnight–5 am) applies to selected routes",
     "items": {
       "transfer": {
         "title": "Airport & port transfers",
@@ -95,7 +96,7 @@
       "deposit": "Booking fee (online now)",
       "remainder": "Cash on arrival (balance)",
       "noShows": "We hold your seat with a €5 booking fee charged today. Free cancellation up to 24 hours before pickup — no questions asked.",
-      "bookingFeeNote": "€5 booking fee · minimum fare €15 · 15% deposit charged online"
+      "bookingFeeNote": "€3 call fee · €5 booking fee · minimum fare €15 · 15% deposit charged online"
     },
     "errors": {
       "required": "Please fill in all required fields.",

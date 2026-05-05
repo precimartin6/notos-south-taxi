@@ -1,8 +1,8 @@
 import {getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
-import { ArrowRight, Check, Clock, Map, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, Check, Clock, Map, Package, ShieldCheck, Sparkles, Users } from 'lucide-react';
 import { DESTINATIONS, SITE, type Destination } from '@/lib/site-config';
-import { FIXED_ROUTES } from '@/lib/pricing';
+import { FIXED_ROUTES, extractDayPrice } from '@/lib/pricing';
 import RotatingPhotos from '@/components/RotatingPhotos';
 import FleetSection from '@/components/FleetSection';
 import ReviewsCarousel from '@/components/ReviewsCarousel';
@@ -107,7 +107,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((d, idx) => {
-            const price = FIXED_ROUTES[`airport:${d.slug}`];
+            const price = extractDayPrice(FIXED_ROUTES[`airport:${d.slug}`]);
             return <RouteCard key={d.slug} d={d} price={price} locale={locale} idx={idx} />;
           })}
         </div>
@@ -151,10 +151,11 @@ export default async function HomePage({ params: { locale } }: { params: { local
             <p className="mt-2 text-notos-blue-deep/70">{t('services.subtitle')}</p>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {(['transfer','h24','tours','sightseeing','vans','corporate'] as const).map((k, i) => (
+            {(['transfer','h24','tours','sightseeing','vans','corporate','parcels'] as const).map((k, i) => (
               <ServiceCard key={k} icon={SERVICE_ICONS[i]} title={t(`services.items.${k}.title`)} body={t(`services.items.${k}.body`)} />
             ))}
           </div>
+          <p className="mt-6 text-center text-xs text-notos-blue-deep/50">{t('services.feesNote')}</p>
         </div>
       </section>
 
@@ -190,7 +191,8 @@ const SERVICE_ICONS = [
   <Map key="i3" className="h-5 w-5" />,
   <Sparkles key="i4" className="h-5 w-5" />,
   <Users key="i5" className="h-5 w-5" />,
-  <ShieldCheck key="i6" className="h-5 w-5" />
+  <ShieldCheck key="i6" className="h-5 w-5" />,
+  <Package key="i7" className="h-5 w-5" />
 ];
 
 function RouteCard({ d, price, locale, idx = 0 }: { d: Destination; price?: number; locale: Locale; idx?: number }) {

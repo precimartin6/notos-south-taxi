@@ -2,6 +2,9 @@ import type { DestinationSlug } from './site-config';
 
 export type VehicleType = 'taxi' | 'station_wagon' | 'van' | 'coach';
 
+/** A route price can be a flat number or separate day/night prices. */
+export type FixedRoutePrice = number | { day: number; night: number };
+
 export interface QuoteRequest {
   fromSlug?: string;        // 'airport' | 'athens-centre' | etc.
   toSlug?: string;
@@ -24,6 +27,12 @@ export interface QuoteResult {
   estimatedKm?: number;
 }
 
+/** Returns the daytime price for display (e.g. "from €X" badges). */
+export function extractDayPrice(p: FixedRoutePrice | undefined): number | undefined {
+  if (p == null) return undefined;
+  return typeof p === 'object' ? p.day : p;
+}
+
 /**
  * Fixed-price table. All prices in EUR for a STANDARD TAXI (4 pax, up to 3 luggage).
  * Vehicle and extras multipliers applied on top.
@@ -31,61 +40,65 @@ export interface QuoteResult {
  * Keys are ALPHABETICALLY SORTED pairs so we only need one entry per pair
  * (e.g. 'airport:athens-centre' covers both directions).
  *
- * The lookup function tries both orders: A:B and B:A.
+ * Routes with {day, night} have explicit per-time prices; night surcharge is NOT
+ * applied additionally.  Routes stored as a plain number get the 10% night
+ * surcharge applied automatically at quote time.
  */
-export const FIXED_ROUTES: Record<string, number> = {
-  // ----- Airport routes -----
-  'airport:athens-centre': 55,
-  'airport:piraeus-port': 65,
-  'airport:rafina-port': 45,
-  'airport:sounio': 90,
-  'airport:chalkida': 110,
-  'airport:ancient-corinth': 130,
-  'airport:korinthos': 140,
-  'airport:nafplio': 180,
-  'airport:mycenae': 170,
-  'airport:porto-heli': 280,
-  'airport:delphi': 260,
-  'airport:patra': 280,
-  'airport:kalamata': 380,
-  'airport:meteora': 440,
-  'airport:ioannina': 520,
-  'airport:thessaloniki': 580,
+export const FIXED_ROUTES: Record<string, FixedRoutePrice> = {
+  // ----- Airport routes — explicit day / night (midnight–05:00) pricing -----
+  'airport:athens-centre':  { day: 50,  night: 60  },
+  'airport:piraeus-port':   { day: 65,  night: 70  },
+  'airport:vouliagmeni':    { day: 45,  night: 50  },
+  'airport:glyfada':        { day: 45,  night: 50  },
+  'airport:varkiza':        { day: 45,  night: 50  },
+  'airport:lagonisi':       { day: 45,  night: 50  },
+  'airport:anavysso':       { day: 45,  night: 50  },
+  'airport:sounio':         { day: 50,  night: 60  },
 
-  // ----- Local neighbourhood routes (to/from airport implied by the lookup) -----
-  'airport:vouliagmeni': 50,
-  'airport:glyfada': 45,
-  'airport:alimos': 45,
-  'airport:piraeus': 60,
+  // ----- Airport routes — flat price (night surcharge applied automatically) -----
+  'airport:rafina-port':    45,
+  'airport:chalkida':       110,
+  'airport:ancient-corinth':130,
+  'airport:korinthos':      140,
+  'airport:nafplio':        180,
+  'airport:mycenae':        170,
+  'airport:porto-heli':     280,
+  'airport:delphi':         260,
+  'airport:patra':          280,
+  'airport:kalamata':       380,
+  'airport:meteora':        440,
+  'airport:ioannina':       520,
+  'airport:thessaloniki':   580,
+  'airport:alimos':         45,
+  'airport:piraeus':        60,
+
+  // ----- Local routes — explicit day / night pricing -----
+  'vouliagmeni:sounio':     { day: 55,  night: 60  },
+  'athens-centre:sounio':   { day: 85,  night: 100 },
+  'piraeus:sounio':         { day: 90,  night: 100 },
+  'piraeus-port:sounio':    { day: 90,  night: 100 },
+  'kifisia:vouliagmeni':    { day: 50,  night: 60  },
 
   // ----- Common inter-city / neighbourhood routes -----
-  // Riviera ↔ Athens centre
   'athens-centre:vouliagmeni': 35,
-  'athens-centre:glyfada': 25,
-  'athens-centre:alimos': 20,
-
-  // Riviera ↔ Piraeus
-  'piraeus:vouliagmeni': 30,
-  'piraeus:glyfada': 25,
-  'piraeus:alimos': 18,
-  'athens-centre:piraeus': 25,
-  'piraeus-port:vouliagmeni': 35,
-  'piraeus-port:glyfada': 28,
-  'piraeus-port:alimos': 22,
-  'piraeus-port:athens-centre': 28,
-
-  // Neighbourhood ↔ ports
-  'rafina-port:vouliagmeni': 55,
-  'rafina-port:glyfada': 50,
-  'rafina-port:alimos': 50,
+  'athens-centre:glyfada':     25,
+  'athens-centre:alimos':      20,
+  'piraeus:vouliagmeni':       30,
+  'piraeus:glyfada':           25,
+  'piraeus:alimos':            18,
+  'athens-centre:piraeus':     25,
+  'piraeus-port:vouliagmeni':  35,
+  'piraeus-port:glyfada':      28,
+  'piraeus-port:alimos':       22,
+  'piraeus-port:athens-centre':28,
+  'rafina-port:vouliagmeni':   55,
+  'rafina-port:glyfada':       50,
+  'rafina-port:alimos':        50,
   'rafina-port:athens-centre': 40,
-
-  // Vouliagmeni/Glyfada ↔ destination routes
-  'vouliagmeni:sounio': 45,
-  'glyfada:sounio': 50,
-  'vouliagmeni:korinthos': 95,
-  'vouliagmeni:ancient-corinth': 90,
-  'glyfada:korinthos': 100,
+  'glyfada:sounio':            50,
+  'vouliagmeni:korinthos':     95,
+  'vouliagmeni:ancient-corinth':90,
+  'glyfada:korinthos':         100,
 };
 
 /** Minimum fare floor for the standard taxi (vehicle multipliers apply on top). */
@@ -108,7 +121,7 @@ const VEHICLE_MULT: Record<VehicleType, number> = {
 
 const PER_KM = 1.65;       // for custom routes
 const BASE_FARE = 12;      // pickup fee
-const NIGHT_SURCHARGE = 1.10; // 00:00–05:00
+const NIGHT_SURCHARGE = 1.10; // applied only when route lacks explicit night price
 const CHILD_SEAT_FEE = 5;
 const EXTRA_LUGGAGE_FEE = 3; // per piece beyond 3
 const BIG_LUGGAGE_FEE = 6;   // per oversize bag
@@ -123,18 +136,13 @@ function isNight(iso: string) {
  * Build lookup key(s) and find the first match in FIXED_ROUTES.
  * Tries both directions: A→B and B→A.
  */
-function lookupFixedRoute(from?: string, to?: string): number | null {
+function lookupFixedRoute(from?: string, to?: string): FixedRoutePrice | null {
   if (!from || !to) return null;
   const a = from.toLowerCase();
   const b = to.toLowerCase();
-  if (a === b) return null; // same location
+  if (a === b) return null;
 
-  // Try: a:b, b:a, airport:X (both directions)
-  const candidates = [
-    `${a}:${b}`,
-    `${b}:${a}`,
-  ];
-  // Also normalise: if either side is 'airport', make sure we try airport:other
+  const candidates = [`${a}:${b}`, `${b}:${a}`];
   if (a === 'airport') candidates.push(`airport:${b}`);
   if (b === 'airport') candidates.push(`airport:${a}`);
 
@@ -149,11 +157,18 @@ export function quote(req: QuoteRequest): QuoteResult {
   let base = 0;
   let source: QuoteResult['source'] = 'fixed';
   let estimatedKm: number | undefined;
+  const night = isNight(req.pickupAtIso);
 
-  const fixedPrice = lookupFixedRoute(req.fromSlug, req.toSlug);
+  const fixedRouteData = lookupFixedRoute(req.fromSlug, req.toSlug);
+  let hasExplicitNightPrice = false;
 
-  if (fixedPrice != null) {
-    base = fixedPrice;
+  if (fixedRouteData != null) {
+    if (typeof fixedRouteData === 'object') {
+      base = night ? fixedRouteData.night : fixedRouteData.day;
+      hasExplicitNightPrice = true;
+    } else {
+      base = fixedRouteData;
+    }
     breakdown.push({ label: `Fixed route fare`, amountEUR: base });
   } else if (req.fromAddress && req.toAddress) {
     // distance-based fallback. The actual km comes from Google Maps in the API route.
@@ -165,7 +180,6 @@ export function quote(req: QuoteRequest): QuoteResult {
       breakdown.push({ label: `Base fare`, amountEUR: BASE_FARE });
       breakdown.push({ label: `${km.toFixed(1)} km × €${PER_KM}`, amountEUR: km * PER_KM });
     } else {
-      // No distance data available — can't price this route
       return {
         totalEUR: 0,
         depositEUR: 0,
@@ -175,9 +189,7 @@ export function quote(req: QuoteRequest): QuoteResult {
       };
     }
   } else if (req.fromSlug && req.toSlug) {
-    // Both slugs provided but no fixed route exists for this pair,
-    // and no custom addresses to compute distance from.
-    // Instead of returning a wrong €15, tell the UI to show "call for quote".
+    // Both slugs provided but no fixed route — show call for quote.
     return {
       totalEUR: 0,
       depositEUR: 0,
@@ -186,7 +198,6 @@ export function quote(req: QuoteRequest): QuoteResult {
       source: 'call_for_quote'
     };
   } else {
-    // No slugs and no addresses — shouldn't happen, but be safe
     return {
       totalEUR: 0,
       depositEUR: 0,
@@ -203,7 +214,7 @@ export function quote(req: QuoteRequest): QuoteResult {
     base = MIN_TAXI_FARE_EUR;
   }
 
-  // vehicle
+  // vehicle multiplier
   const vMult = VEHICLE_MULT[req.vehicle];
   if (vMult !== 1) {
     const add = base * (vMult - 1);
@@ -211,8 +222,8 @@ export function quote(req: QuoteRequest): QuoteResult {
     base += add;
   }
 
-  // night surcharge
-  if (isNight(req.pickupAtIso)) {
+  // Night surcharge: only for routes WITHOUT explicit day/night pricing
+  if (!hasExplicitNightPrice && night) {
     const add = base * (NIGHT_SURCHARGE - 1);
     breakdown.push({ label: `Night surcharge (00:00–05:00)`, amountEUR: add });
     base += add;

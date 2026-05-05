@@ -29,16 +29,28 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-notos-blue/10 bg-notos-paper/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8">
-        <Link href={`/${locale}`} className="flex items-center">
-          <img
-            src="/brand/notos-logo-new.png"
-            alt="Notos South Taxi"
-            className="h-20 w-20 object-contain"
-            width={300}
-            height={72}
-          />
-        </Link>
 
+        {/* Left: logo + language button (visible on all viewports) */}
+        <div className="flex items-center gap-3">
+          <Link href={`/${locale}`} className="flex items-center">
+            <img
+              src="/brand/notos-logo-new.png"
+              alt="Notos South Taxi"
+              className="h-20 w-20 object-contain"
+              width={300}
+              height={72}
+            />
+          </Link>
+          <Link
+            href={switchedPath}
+            className="rounded-full border border-notos-blue/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-notos-blue-deep transition hover:border-notos-blue/50"
+            aria-label={`Switch to ${otherLocale === 'en' ? 'English' : 'Ελληνικά'}`}
+          >
+            {otherLocale === 'en' ? 'EN' : 'ΕΛ'}
+          </Link>
+        </div>
+
+        {/* Desktop nav */}
         <nav className="hidden items-center gap-7 lg:flex">
           {links.map((l) => (
             <Link
@@ -51,8 +63,9 @@ export default function Header() {
           ))}
         </nav>
 
+        {/* Desktop right: phone numbers + book button */}
         <div className="hidden items-center gap-3 lg:flex">
-          <div className="hidden flex-col gap-0.5 xl:flex">
+          <div className="flex flex-col gap-0.5">
             <a
               href={`tel:${SITE.phone.replace(/\s/g, '')}`}
               className="flex items-center gap-1.5 text-sm font-semibold text-notos-blue-deep"
@@ -67,12 +80,6 @@ export default function Header() {
             </a>
           </div>
           <Link
-            href={switchedPath}
-            className="rounded-full border border-notos-blue/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-notos-blue-deep transition hover:border-notos-blue/50"
-          >
-            {otherLocale === 'en' ? 'EN' : 'ΕΛ'}
-          </Link>
-          <Link
             href={`/${locale}/booking`}
             className="inline-flex items-center gap-2 rounded-full bg-notos-blue-deep px-5 py-2.5 text-sm font-semibold text-notos-yellow transition hover:bg-notos-blue"
           >
@@ -81,38 +88,33 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
-          <Link
-            href={switchedPath}
-            className="rounded-full border border-notos-blue/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-notos-blue-deep transition hover:border-notos-blue/50"
-            aria-label={`Switch to ${otherLocale === 'en' ? 'English' : 'Ελληνικά'}`}
-          >
-            {otherLocale === 'en' ? 'EN' : 'ΕΛ'}
-          </Link>
-          <button
-            aria-label="Menu"
-            onClick={() => setOpen((v) => !v)}
-            className="rounded-full border border-notos-blue/15 p-2"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+        {/* Mobile: burger button only (lang is next to logo above) */}
+        <button
+          aria-label="Menu"
+          onClick={() => setOpen((v) => !v)}
+          className="rounded-full border border-notos-blue/15 p-2 lg:hidden"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
 
+      {/* Mobile burger dropdown */}
       {open && (
         <div className="border-t border-notos-blue/10 bg-white px-5 py-4 lg:hidden">
           <div className="flex flex-col gap-3">
-            {links.map((l) => (
-              <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="py-1 font-medium">
-                {l.label}
-              </Link>
-            ))}
+            {/* Phone numbers at the top of the menu */}
             <a href={`tel:${SITE.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 text-sm font-semibold text-notos-blue-deep">
               <Phone className="h-4 w-4" /> {SITE.phone}
             </a>
             <a href={`tel:${PHONE2.replace(/\s/g, '')}`} className="flex items-center gap-2 text-sm font-semibold text-notos-blue-deep">
               <Phone className="h-4 w-4" /> {PHONE2}
             </a>
+            <div className="border-t border-notos-blue/10" />
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="py-1 font-medium">
+                {l.label}
+              </Link>
+            ))}
             <Link
               href={`/${locale}/booking`}
               onClick={() => setOpen(false)}

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {getTranslations, setRequestLocale } from 'next-intl/server';
 import { DESTINATIONS, getDestination } from '@/lib/site-config';
-import { FIXED_ROUTES } from '@/lib/pricing';
+import { FIXED_ROUTES, extractDayPrice } from '@/lib/pricing';
 import type { Locale } from '@/i18n';
 
 export function generateStaticParams() {
@@ -21,7 +21,7 @@ export default async function DestinationPage({
   const d = getDestination(slug);
   if (!d) notFound();
   const t = await getTranslations({ locale });
-  const price = FIXED_ROUTES[`airport:${d.slug}`];
+  const price = extractDayPrice(FIXED_ROUTES[`airport:${d.slug}`]);
 
   return (
     <article>

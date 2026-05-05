@@ -52,6 +52,10 @@
       "corporate": {
         "title": "Business & events",
         "body": "Conference shuttles, hotel pickups, multi-stop schedules — discreet and on time."
+      },
+      "parcels": {
+        "title": "Unaccompanied parcels",
+        "body": "Need to send a package without travelling yourself? Contact the driver directly to arrange pickup and delivery."
       }
     }
   },

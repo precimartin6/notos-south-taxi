@@ -1,17 +1,18 @@
 import {getTranslations, setRequestLocale } from 'next-intl/server';
-import { ShieldCheck, Clock, Map, Sparkles, Users } from 'lucide-react';
+import { ShieldCheck, Clock, Map, Sparkles, Users, Package } from 'lucide-react';
 import type { Locale } from '@/i18n';
 
 export default async function ServicesPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
-  const items: { key: 'transfer'|'h24'|'tours'|'sightseeing'|'vans'|'corporate'; icon: React.ReactNode }[] = [
+  const items: { key: 'transfer'|'h24'|'tours'|'sightseeing'|'vans'|'corporate'|'parcels'; icon: React.ReactNode }[] = [
     { key: 'transfer', icon: <ShieldCheck className="h-5 w-5" /> },
     { key: 'h24', icon: <Clock className="h-5 w-5" /> },
     { key: 'tours', icon: <Map className="h-5 w-5" /> },
     { key: 'sightseeing', icon: <Sparkles className="h-5 w-5" /> },
     { key: 'vans', icon: <Users className="h-5 w-5" /> },
-    { key: 'corporate', icon: <ShieldCheck className="h-5 w-5" /> }
+    { key: 'corporate', icon: <ShieldCheck className="h-5 w-5" /> },
+    { key: 'parcels', icon: <Package className="h-5 w-5" /> }
   ];
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">

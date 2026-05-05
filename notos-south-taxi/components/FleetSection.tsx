@@ -1,7 +1,7 @@
 import type { Locale } from '@/i18n';
 
 interface Vehicle {
-  key: 'taxi' | 'wagon' | 'coach' | 'vip';
+  key: 'taxi' | 'wagon' | 'coach';
   name: { en: string; el: string };
   capacity: { en: string; el: string };
   blurb: { en: string; el: string };
@@ -39,16 +39,6 @@ const FLEET: Vehicle[] = [
     },
     images: ['/photos/fleet/coach-exterior.jpg', '/photos/fleet/coach-interior.jpg']
   },
-  {
-    key: 'vip',
-    name: { en: 'VIP & business', el: 'VIP & επιχειρήσεις' },
-    capacity: { en: 'On request', el: 'Κατόπιν αιτήματος' },
-    blurb: {
-      en: 'Discreet executive and luxury transfers, multi-stop schedules, and private hire — by appointment.',
-      el: 'Διακριτικές πολυτελείς μεταφορές, διαδρομές με πολλές στάσεις, ιδιωτικές μισθώσεις — κατόπιν συνεννόησης.'
-    },
-    images: ['/photos/fleet/vip.jpg']
-  }
 ];
 
 export default function FleetSection({ locale }: { locale: Locale }) {

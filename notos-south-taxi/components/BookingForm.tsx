@@ -20,7 +20,7 @@ interface Quote {
   depositEUR: number;
   remainderEUR: number;
   breakdown: { label: string; amountEUR: number }[];
-  source: 'fixed' | 'distance';
+  source: 'fixed' | 'distance' | 'call_for_quote';
   estimatedKm?: number;
 }
 
@@ -477,7 +477,36 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
         </button>
       </div>
 
-      {quote && (
+      {quote && quote.source === 'call_for_quote' && (
+        <div className="mt-6 rounded-2xl border-2 border-dashed border-notos-blue/20 bg-notos-paper p-5 text-center">
+          <p className="font-display text-lg font-bold text-notos-blue-deep">
+            {locale === 'el' ? 'Καλέστε μας για προσφορά' : 'Call us for a quote'}
+          </p>
+          <p className="mt-1 text-sm text-notos-blue-deep/70">
+            {locale === 'el'
+              ? 'Αυτή η διαδρομή δεν έχει σταθερή τιμή. Καλέστε ή στείλτε WhatsApp για άμεση προσφορά.'
+              : "This route doesn't have a fixed price. Call or WhatsApp us for an instant quote."}
+          </p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <a
+              href={`tel:${SITE.phone.replace(/\s/g, '')}`}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-notos-blue-deep px-5 py-2.5 text-sm font-semibold text-notos-yellow"
+            >
+              📞 {SITE.phone}
+            </a>
+            <a
+              href={`https://wa.me/${SITE.whatsapp.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              💬 WhatsApp
+            </a>
+          </div>
+        </div>
+      )}
+
+      {quote && quote.source !== 'call_for_quote' && (
         <div className="mt-6 rounded-2xl bg-notos-paper p-5">
           <div className="grid gap-3 sm:grid-cols-3">
             <div>

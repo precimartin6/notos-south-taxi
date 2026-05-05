@@ -20,7 +20,7 @@ interface Quote {
   depositEUR: number;
   remainderEUR: number;
   breakdown: { label: string; amountEUR: number }[];
-  source: 'fixed' | 'distance' | 'call_for_quote';
+  source: 'fixed' | 'call_for_quote';
   estimatedKm?: number;
 }
 
@@ -223,6 +223,7 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
   const [loadingQuote, setLoadingQuote] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [returnedFromPayment, setReturnedFromPayment] = useState(false);
   const vanNoticeRef = useRef<HTMLDivElement>(null);
 
   const usingCustomFrom = fromSlug === CUSTOM;
@@ -242,6 +243,25 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
     const minutesUntil = (pickupMs - Date.now()) / 60000;
     return minutesUntil < VAN_MIN_NOTICE_MINUTES;
   }, [vehicle, pickupAt]);
+
+  // When the user navigates back from Viva's checkout page the browser restores
+  // this page from the bfcache with submitting=true still set. The pageshow
+  // event fires in that case (e.persisted === true); reset submitting so the
+  // button is usable again and show a friendly "you came back" banner.
+  useEffect(() => {
+    function handlePageShow(e: PageTransitionEvent) {
+      if (!e.persisted) return;
+      setSubmitting(false);
+      try {
+        if (sessionStorage.getItem('notos_last_booking')) {
+          setReturnedFromPayment(true);
+          sessionStorage.removeItem('notos_last_booking');
+        }
+      } catch {}
+    }
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
 
   function payload() {
     return {
@@ -324,17 +344,27 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
         })
       });
       const data = await r.json();
-      if (!r.ok) throw new Error(data?.error || 'booking_failed');
+      if (!r.ok) {
+        // 400 = form validation; anything else = server/payment failure
+        throw Object.assign(new Error(data?.error || 'booking_failed'), { status: r.status });
+      }
       try { sessionStorage.setItem('notos_last_booking', data.bookingId); } catch {}
       window.location.href = data.checkoutUrl;
     } catch (e: any) {
-      setError(t('errors.submit'));
+      setError(e?.status === 400 ? t('errors.required') : t('errors.submit'));
       setSubmitting(false);
     }
   }
 
   return (
     <form onSubmit={submit} className="rounded-3xl border border-notos-blue/10 bg-white p-6 shadow-card sm:p-8">
+      {returnedFromPayment && (
+        <div className="mb-6 rounded-2xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {locale === 'el'
+            ? 'Φαίνεται ότι επιστρέψατε από την πλατφόρμα πληρωμής. Μπορείτε να ξαναδοκιμάσετε παρακάτω ή να επικοινωνήσετε μαζί μας.'
+            : 'It looks like you returned from the payment page. You can try again below or contact us directly.'}
+        </div>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         <PlaceField
           label={t('from')}
@@ -479,12 +509,12 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
       {quote && quote.source === 'call_for_quote' && (
         <div className="mt-6 rounded-2xl border-2 border-dashed border-notos-blue/20 bg-notos-paper p-5 text-center">
           <p className="font-display text-lg font-bold text-notos-blue-deep">
-            {locale === 'el' ? 'Καλέστε μας για προσφορά' : 'Call us for a quote'}
+            {locale === 'el' ? 'Κατόπιν συνεννόησης' : 'Price by arrangement'}
           </p>
           <p className="mt-1 text-sm text-notos-blue-deep/70">
             {locale === 'el'
-              ? 'Αυτή η διαδρομή δεν έχει σταθερή τιμή. Καλέστε ή στείλτε WhatsApp για άμεση προσφορά.'
-              : "This route doesn't have a fixed price. Call or WhatsApp us for an instant quote."}
+              ? 'Αυτή η διαδρομή δεν έχει σταθερή τιμή. Επικοινωνήστε απευθείας με τον οδηγό για να συμφωνήσετε τιμή.'
+              : 'This route has no fixed price. Contact the driver directly to agree on a fare.'}
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
             <a

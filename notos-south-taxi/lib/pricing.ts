@@ -23,7 +23,7 @@ export interface QuoteResult {
   depositEUR: number;       // 15%
   remainderEUR: number;     // 85% paid in cash
   breakdown: { label: string; amountEUR: number }[];
-  source: 'fixed' | 'distance' | 'call_for_quote';
+  source: 'fixed' | 'call_for_quote';
   estimatedKm?: number;
 }
 
@@ -55,7 +55,7 @@ export const FIXED_ROUTES: Record<string, FixedRoutePrice> = {
   'airport:anavysso':       { day: 45,  night: 50  },
   'airport:sounio':         { day: 50,  night: 60  },
 
-  // ----- Airport routes — flat price (night surcharge applied automatically) -----
+  // ----- Airport → destination routes (shown on the "Where we go" page) -----
   'airport:rafina-port':    45,
   'airport:chalkida':       110,
   'airport:ancient-corinth':130,
@@ -69,8 +69,6 @@ export const FIXED_ROUTES: Record<string, FixedRoutePrice> = {
   'airport:meteora':        440,
   'airport:ioannina':       520,
   'airport:thessaloniki':   580,
-  'airport:alimos':         45,
-  'airport:piraeus':        60,
 
   // ----- Local routes — explicit day / night pricing -----
   'vouliagmeni:sounio':     { day: 55,  night: 60  },
@@ -78,27 +76,6 @@ export const FIXED_ROUTES: Record<string, FixedRoutePrice> = {
   'piraeus:sounio':         { day: 90,  night: 100 },
   'piraeus-port:sounio':    { day: 90,  night: 100 },
   'kifisia:vouliagmeni':    { day: 50,  night: 60  },
-
-  // ----- Common inter-city / neighbourhood routes -----
-  'athens-centre:vouliagmeni': 35,
-  'athens-centre:glyfada':     25,
-  'athens-centre:alimos':      20,
-  'piraeus:vouliagmeni':       30,
-  'piraeus:glyfada':           25,
-  'piraeus:alimos':            18,
-  'athens-centre:piraeus':     25,
-  'piraeus-port:vouliagmeni':  35,
-  'piraeus-port:glyfada':      28,
-  'piraeus-port:alimos':       22,
-  'piraeus-port:athens-centre':28,
-  'rafina-port:vouliagmeni':   55,
-  'rafina-port:glyfada':       50,
-  'rafina-port:alimos':        50,
-  'rafina-port:athens-centre': 40,
-  'glyfada:sounio':            50,
-  'vouliagmeni:korinthos':     95,
-  'vouliagmeni:ancient-corinth':90,
-  'glyfada:korinthos':         100,
 };
 
 /** Minimum fare floor for the standard taxi (vehicle multipliers apply on top). */
@@ -115,12 +92,10 @@ export function vehicleNeedsAdvanceNotice(v: VehicleType): boolean {
 const VEHICLE_MULT: Record<VehicleType, number> = {
   taxi: 1,
   station_wagon: 1.15,
-  van: 1.55,
+  van: 2,
   coach: 2.4
 };
 
-const PER_KM = 1.65;       // for custom routes
-const BASE_FARE = 12;      // pickup fee
 const NIGHT_SURCHARGE = 1.10; // applied only when route lacks explicit night price
 const CHILD_SEAT_FEE = 5;
 const EXTRA_LUGGAGE_FEE = 3; // per piece beyond 3
@@ -155,8 +130,6 @@ function lookupFixedRoute(from?: string, to?: string): FixedRoutePrice | null {
 export function quote(req: QuoteRequest): QuoteResult {
   const breakdown: QuoteResult['breakdown'] = [];
   let base = 0;
-  let source: QuoteResult['source'] = 'fixed';
-  let estimatedKm: number | undefined;
   const night = isNight(req.pickupAtIso);
 
   const fixedRouteData = lookupFixedRoute(req.fromSlug, req.toSlug);
@@ -170,34 +143,8 @@ export function quote(req: QuoteRequest): QuoteResult {
       base = fixedRouteData;
     }
     breakdown.push({ label: `Fixed route fare`, amountEUR: base });
-  } else if (req.fromAddress && req.toAddress) {
-    // distance-based fallback. The actual km comes from Google Maps in the API route.
-    const km = (req as any).custom_km ?? 0;
-    if (km > 0) {
-      estimatedKm = km;
-      base = BASE_FARE + km * PER_KM;
-      source = 'distance';
-      breakdown.push({ label: `Base fare`, amountEUR: BASE_FARE });
-      breakdown.push({ label: `${km.toFixed(1)} km × €${PER_KM}`, amountEUR: km * PER_KM });
-    } else {
-      return {
-        totalEUR: 0,
-        depositEUR: 0,
-        remainderEUR: 0,
-        breakdown: [{ label: 'Call for quote', amountEUR: 0 }],
-        source: 'call_for_quote'
-      };
-    }
-  } else if (req.fromSlug && req.toSlug) {
-    // Both slugs provided but no fixed route — show call for quote.
-    return {
-      totalEUR: 0,
-      depositEUR: 0,
-      remainderEUR: 0,
-      breakdown: [{ label: 'Call for quote', amountEUR: 0 }],
-      source: 'call_for_quote'
-    };
   } else {
+    // Any combination not in the fixed table → contact driver for price.
     return {
       totalEUR: 0,
       depositEUR: 0,
@@ -253,5 +200,5 @@ export function quote(req: QuoteRequest): QuoteResult {
   const deposit = Math.round(total * 0.15 * 100) / 100;
   const remainder = Math.round((total - deposit) * 100) / 100;
 
-  return { totalEUR: total, depositEUR: deposit, remainderEUR: remainder, breakdown, source, estimatedKm };
+  return { totalEUR: total, depositEUR: deposit, remainderEUR: remainder, breakdown, source: 'fixed' };
 }

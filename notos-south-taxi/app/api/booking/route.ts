@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { quote, vehicleNeedsAdvanceNotice, VAN_MIN_NOTICE_MINUTES } from '@/lib/pricing';
-import { distanceKm } from '@/lib/integrations/maps';
 import { createPaymentOrder } from '@/lib/integrations/viva';
 import { db, newBookingId } from '@/lib/db';
 
@@ -48,11 +47,6 @@ export async function POST(req: NextRequest) {
   }
 
   // recompute price server-side (never trust client)
-  let custom_km: number | undefined;
-  if ((!d.fromSlug || !d.toSlug) && d.fromAddress && d.toAddress) {
-    const km = await distanceKm(d.fromAddress, d.toAddress);
-    if (km != null) custom_km = km;
-  }
   const q = quote({
     fromSlug: d.fromSlug,
     toSlug: d.toSlug,
@@ -64,8 +58,6 @@ export async function POST(req: NextRequest) {
     bigLuggage: d.bigLuggage,
     childSeats: d.childSeats,
     pickupAtIso: d.pickupAtIso,
-    // @ts-ignore
-    custom_km
   });
 
   const id = newBookingId();

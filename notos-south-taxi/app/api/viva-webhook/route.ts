@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
-import { sendCustomerConfirmation } from '@/lib/integrations/email';
+import { sendCustomerConfirmation, sendDriverNotification } from '@/lib/integrations/email';
 
 export async function GET(req: NextRequest) {
   const key = req.nextUrl.searchParams.get('Key');
@@ -48,6 +48,26 @@ export async function POST(req: NextRequest) {
       customerName:  booking.customerName,
       customerPhone: booking.customerPhone,
       customerEmail: booking.customerEmail,
+      fromText:      booking.fromText,
+      toText:        booking.toText,
+      pickupAtIso:   booking.pickupAtIso,
+      passengers:    booking.passengers,
+      luggage:       booking.luggage,
+      childSeats:    booking.childSeats,
+      vehicle:       booking.vehicle,
+      flightNumber:  booking.flightNumber,
+      notes:         booking.notes,
+      totalEUR:      booking.totalEUR,
+      depositEUR:    booking.depositEUR,
+      remainderEUR:  booking.remainderEUR,
+    });
+
+    // Send driver notification email to Martin Preci
+    await sendDriverNotification({
+      bookingRef:    booking.id,
+      customerName:  booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
       fromText:      booking.fromText,
       toText:        booking.toText,
       pickupAtIso:   booking.pickupAtIso,

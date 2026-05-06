@@ -15,6 +15,7 @@ export interface CustomerEmailPayload {
   bookingRef: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   fromText: string;
   toText: string;
   pickupAtIso: string;
@@ -285,7 +286,7 @@ function buildDriverHtml(b: CustomerEmailPayload): string {
 </html>`;
 }
 
-export async function sendDriverNotification(b: CustomerEmailPayload & { customerPhone: string }): Promise<void> {
+export async function sendDriverNotification(b: CustomerEmailPayload): Promise<void> {
   const apiKey      = process.env.RESEND_API_KEY;
   const from        = process.env.RESEND_FROM_EMAIL ?? 'bookings@notossouthtaxi.com';
   const driverEmail = process.env.DRIVER_EMAIL;

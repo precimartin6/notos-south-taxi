@@ -128,7 +128,6 @@ function buildAdapter(): Adapter {
 
   if (kvUrl && kvToken) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { createClient } = require('@vercel/kv') as typeof import('@vercel/kv');
       const kv = createClient({ url: kvUrl, token: kvToken });
       console.log('[db] Using Vercel KV adapter');

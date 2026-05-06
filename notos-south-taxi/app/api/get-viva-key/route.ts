@@ -3,7 +3,14 @@ import { db } from '@/lib/db';
 import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 import { sendCustomerConfirmation, sendDriverNotification } from '@/lib/integrations/email';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Viva webhook verification: GET ?Key=xxx → respond { Key: xxx }
+  const key = req.nextUrl.searchParams.get('Key');
+  if (key) {
+    return NextResponse.json({ Key: key });
+  }
+
+  // Original merchant key lookup (used internally)
   const merchantId = process.env.VIVA_MERCHANT_ID;
   const apiKey = process.env.VIVA_API_KEY;
 

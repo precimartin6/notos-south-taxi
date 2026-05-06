@@ -219,3 +219,103 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
     console.error('[resend] Request error:', err);
   }
 }
+
+// ─── Driver notification email ────────────────────────────────────────────────
+
+function buildDriverHtml(b: CustomerEmailPayload): string {
+  const dt = new Date(b.pickupAtIso);
+  const dateStr = dt.toLocaleString('en-GB', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+    timeZone: 'Europe/Athens',
+  });
+
+  const VEHICLE_LABELS: Record<string, string> = {
+    taxi: 'Standard Taxi', station_wagon: 'Station Wagon', van: 'Van (up to 8)', coach: 'Minibus / Coach',
+  };
+
+  const rows = [
+    row('Booking ref',       b.bookingRef,                          false),
+    row('Pickup',            dateStr,                               true),
+    row('From',              b.fromText,                            false),
+    row('To',                b.toText,                              true),
+    row('Vehicle',           VEHICLE_LABELS[b.vehicle] ?? b.vehicle, false),
+    row('Passengers',        b.passengers,                          true),
+    row('Luggage',           b.luggage,                             false),
+    ...(b.childSeats > 0    ? [row('Child seats',   b.childSeats,   true)]  : []),
+    ...(b.flightNumber      ? [row('Flight',         b.flightNumber, false)] : []),
+    ...(b.notes             ? [row('Notes',          b.notes,        true)]  : []),
+    row('Customer',          b.customerName,                        false),
+    row('Phone',             b.customerPhone ?? '',                 true),
+    row('Email',             b.customerEmail,                       false),
+    row('Deposit paid',      `€${b.depositEUR.toFixed(2)}`,         true),
+    row('Cash on arrival',   `€${b.remainderEUR.toFixed(2)}`,       false),
+    row('Total',             `€${b.totalEUR.toFixed(2)}`,           true),
+  ].join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f0f0f0;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+        <tr>
+          <td style="background:#1e3a5f;padding:28px 32px;text-align:center;">
+            <p style="margin:0;color:#f8d347;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Notos South Taxi — Driver</p>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">🚖 New Booking Paid</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:6px;overflow:hidden;border:1px solid #e5e5e5;">
+              ${rows}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8f8f8;padding:16px 32px;text-align:center;border-top:1px solid #e5e5e5;">
+            <p style="margin:0;font-size:12px;color:#999;">© ${new Date().getFullYear()} Notos South Taxi — ${SITE.vatId}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendDriverNotification(b: CustomerEmailPayload & { customerPhone: string }): Promise<void> {
+  const apiKey      = process.env.RESEND_API_KEY;
+  const from        = process.env.RESEND_FROM_EMAIL ?? 'bookings@notossouthtaxi.com';
+  const driverEmail = process.env.DRIVER_EMAIL;
+
+  if (!apiKey) {
+    console.warn('[resend] RESEND_API_KEY not set — skipping driver notification email');
+    return;
+  }
+  if (!driverEmail) {
+    console.warn('[resend] DRIVER_EMAIL not set — skipping driver notification email');
+    return;
+  }
+
+  try {
+    const { Resend } = require('resend') as typeof import('resend');
+    const resend = new Resend(apiKey);
+
+    const { error } = await resend.emails.send({
+      from,
+      to:      driverEmail,
+      subject: `🚖 New booking ${b.bookingRef} — ${b.fromText} → ${b.toText}`,
+      html:    buildDriverHtml(b),
+    });
+
+    if (error) {
+      console.error('[resend] Failed to send driver notification:', error);
+    } else {
+      console.log(`[resend] Driver notified at ${driverEmail} for ${b.bookingRef} ✓`);
+    }
+  } catch (err) {
+    console.error('[resend] Driver email error:', err);
+  }
+}

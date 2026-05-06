@@ -9,8 +9,8 @@
  *   4) Receive webhook at /api/webhook on success/failure
  */
 
-const ACCOUNTS_URL  = process.env.VIVA_ACCOUNTS_URL  || 'https://demo-accounts.vivapayments.com';
-const API_URL       = process.env.VIVA_BASE_URL       || 'https://demo.vivapayments.com';
+const ACCOUNTS_URL  = (process.env.VIVA_ACCOUNTS_URL  || 'https://demo-accounts.vivapayments.com').replace(/\/$/, '');
+const API_URL       = (process.env.VIVA_BASE_URL       || 'https://demo.vivapayments.com').replace(/\/$/, '');
 const CLIENT_ID     = process.env.VIVA_CLIENT_ID      || '';
 const CLIENT_SECRET = process.env.VIVA_CLIENT_SECRET  || '';
 const SOURCE_CODE   = process.env.VIVA_SOURCE_CODE    || '';

@@ -200,7 +200,6 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
   const t = T[locale];
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { Resend } = require('resend') as typeof import('resend');
     const resend = new Resend(apiKey);
 

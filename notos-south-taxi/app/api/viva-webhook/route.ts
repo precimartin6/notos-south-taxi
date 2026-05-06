@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
+import { sendCustomerConfirmation } from '@/lib/integrations/email';
 
 export async function GET(req: NextRequest) {
   const key = req.nextUrl.searchParams.get('Key');
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
   const booking = await db.getByVivaOrder(Number(orderCode));
 
   if (!booking) {
-    console.warn('[viva-webhook] No booking found for orderCode', orderCode);
+    console.warn('[viva-webhook] No booking found for orderCode', orderCode, '— KV not configured? See README for Vercel KV setup.');
     return NextResponse.json({ ok: true });
   }
 
@@ -40,6 +41,8 @@ export async function POST(req: NextRequest) {
     await db.setStatus(booking.id, 'paid', {
       notifiedAt: new Date().toISOString(),
     });
+
+    // Notify driver via WhatsApp (CallMeBot)
     await notifyDriverNewBooking('', {
       bookingRef:    booking.id,
       customerName:  booking.customerName,
@@ -57,6 +60,26 @@ export async function POST(req: NextRequest) {
       totalEUR:      booking.totalEUR,
       depositEUR:    booking.depositEUR,
       remainderEUR:  booking.remainderEUR,
+    });
+
+    // Send booking confirmation email to customer
+    await sendCustomerConfirmation({
+      bookingRef:    booking.id,
+      customerName:  booking.customerName,
+      customerEmail: booking.customerEmail,
+      fromText:      booking.fromText,
+      toText:        booking.toText,
+      pickupAtIso:   booking.pickupAtIso,
+      passengers:    booking.passengers,
+      luggage:       booking.luggage,
+      childSeats:    booking.childSeats,
+      vehicle:       booking.vehicle,
+      flightNumber:  booking.flightNumber,
+      notes:         booking.notes,
+      totalEUR:      booking.totalEUR,
+      depositEUR:    booking.depositEUR,
+      remainderEUR:  booking.remainderEUR,
+      locale:        booking.locale,
     });
   } else if (eventTypeId === 1798) {
     console.log('[viva-webhook] Payment failed for booking', booking.id);

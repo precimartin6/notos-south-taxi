@@ -131,10 +131,10 @@ export function quote(req: QuoteRequest): QuoteResult {
   // ── TEMPORARY TEST ROUTE — remove after payment verification ──────────────
   if (req.fromSlug === 'test-payment' || req.toSlug === 'test-payment') {
     return {
-      totalEUR: 0.50,
-      depositEUR: 0.50,
+      totalEUR: 0.10,
+      depositEUR: 0.10,
       remainderEUR: 0,
-      breakdown: [{ label: 'Test payment — remove after verification', amountEUR: 0.50 }],
+      breakdown: [{ label: 'Test payment — remove after verification', amountEUR: 0.10 }],
       source: 'fixed'
     };
   }

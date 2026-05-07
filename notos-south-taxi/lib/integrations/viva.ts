@@ -160,7 +160,10 @@ export async function checkOrderStatus(orderCode: number | string): Promise<'pai
 
   try {
     const token = await getAccessToken();
-    const res = await fetch(`${API_URL}/checkout/v2/transactions?orderCode=${orderCode}`, {
+
+    // Step 1: Retrieve the order to see if it has been paid.
+    // GET /checkout/v2/orders/{orderCode} returns the order object.
+    const orderRes = await fetch(`${API_URL}/checkout/v2/orders/${orderCode}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -169,28 +172,31 @@ export async function checkOrderStatus(orderCode: number | string): Promise<'pai
       cache: 'no-store',
     });
 
-    if (!res.ok) {
-      console.warn('[viva] order status check failed:', res.status);
+    if (!orderRes.ok) {
+      console.warn('[viva] order lookup failed:', orderRes.status, await orderRes.text().catch(() => ''));
       return 'unknown';
     }
 
-    const data = await res.json();
-    // The transactions endpoint returns either an array or { transactions: [...] }
-    const txns = Array.isArray(data) ? data : (data?.transactions || data?.Transactions || []);
+    const order = await orderRes.json();
+    console.log('[viva] order lookup result:', JSON.stringify({
+      orderCode: order.orderCode,
+      stateId: order.stateId,
+      paymentAmount: order.paymentAmount,
+      requestAmount: order.requestAmount,
+    }));
 
-    if (!txns.length) return 'pending';
+    // Viva order stateId values:
+    //   0 = Pending (not yet paid)
+    //   1 = Expired
+    //   2 = Canceled / Voided
+    //   3 = Paid (has at least one successful transaction)
+    // Some Viva API versions just check if paymentAmount > 0 to mean paid.
 
-    // statusId === 'F' (Finished) means success in Viva's vocabulary.
-    // 'E' = Error, 'A' = Authorized but not captured, 'X' = Refunded.
-    const anyPaid = txns.some((t: any) =>
-      t?.statusId === 'F' || t?.StatusId === 'F' || t?.status === 'F'
-    );
-    if (anyPaid) return 'paid';
+    if (order.stateId === 3 || order.stateId === '3') return 'paid';
+    if (order.stateId === 2 || order.stateId === '2' || order.stateId === 1 || order.stateId === '1') return 'failed';
 
-    const anyFailed = txns.some((t: any) =>
-      t?.statusId === 'E' || t?.StatusId === 'E' || t?.status === 'E'
-    );
-    if (anyFailed) return 'failed';
+    // Also check: if paymentAmount > 0, money was collected = paid.
+    if (typeof order.paymentAmount === 'number' && order.paymentAmount > 0) return 'paid';
 
     return 'pending';
   } catch (err) {

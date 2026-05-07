@@ -349,6 +349,30 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
         throw Object.assign(new Error(data?.error || 'booking_failed'), { status: r.status });
       }
       try { sessionStorage.setItem('notos_last_booking', data.bookingId); } catch {}
+      // Save full booking details so the success page can pass them to the
+      // notification endpoint. Without this, notifications can't fire because
+      // the in-memory DB loses the record across Vercel Lambda invocations.
+      try {
+        sessionStorage.setItem('notos_last_booking_data', JSON.stringify({
+          id: data.bookingId,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
+          fromText: usingCustomFrom ? fromAddr : (destinations.find((d) => d.slug === fromSlug)?.label || fromSlug),
+          toText: usingCustomTo ? toAddr : (destinations.find((d) => d.slug === toSlug)?.label || toSlug),
+          pickupAtIso: payload().pickupAtIso,
+          vehicle: payload().vehicle,
+          passengers: payload().passengers,
+          luggage: payload().luggage,
+          childSeats: payload().childSeats,
+          flightNumber: flightNumber || undefined,
+          notes: notes || undefined,
+          totalEUR: data.total,
+          depositEUR: data.deposit,
+          remainderEUR: data.remainder,
+          locale
+        }));
+      } catch {}
       window.location.href = data.checkoutUrl;
     } catch (e: any) {
       setError(e?.status === 400 ? t('errors.required') : t('errors.submit'));

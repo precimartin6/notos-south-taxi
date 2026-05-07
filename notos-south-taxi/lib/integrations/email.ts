@@ -190,7 +190,7 @@ function buildHtml(b: CustomerEmailPayload): string {
 
 export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from   = process.env.RESEND_FROM_EMAIL ?? 'bookings@notossouthtaxi.com';
+  const from   = process.env.RESEND_FROM_EMAIL ?? 'Notos South Taxi <onboarding@resend.dev>';
 
   if (!apiKey) {
     console.warn('[resend] RESEND_API_KEY not set — skipping customer confirmation email');
@@ -201,7 +201,7 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
   const t = T[locale];
 
   try {
-    const { Resend } = require('resend') as typeof import('resend');
+    const { Resend } = await import('resend');
     const resend = new Resend(apiKey);
 
     const { error } = await resend.emails.send({
@@ -288,7 +288,7 @@ function buildDriverHtml(b: CustomerEmailPayload): string {
 
 export async function sendDriverNotification(b: CustomerEmailPayload): Promise<void> {
   const apiKey      = process.env.RESEND_API_KEY;
-  const from        = process.env.RESEND_FROM_EMAIL ?? 'bookings@notossouthtaxi.com';
+  const from        = process.env.RESEND_FROM_EMAIL ?? 'Notos South Taxi <onboarding@resend.dev>';
   const driverEmail = process.env.DRIVER_EMAIL;
 
   if (!apiKey) {
@@ -301,7 +301,7 @@ export async function sendDriverNotification(b: CustomerEmailPayload): Promise<v
   }
 
   try {
-    const { Resend } = require('resend') as typeof import('resend');
+    const { Resend } = await import('resend');
     const resend = new Resend(apiKey);
 
     const { error } = await resend.emails.send({

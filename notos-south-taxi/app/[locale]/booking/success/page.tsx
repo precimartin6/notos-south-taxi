@@ -21,41 +21,52 @@ function SuccessContent() {
   const orderCode = sp.get('s') || sp.get('orderCode') || sp.get('t') || sp.get('OrderCode');
 
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingData, setBookingData] = useState<any>(null);
   const [status, setStatus] = useState<'pending' | 'paid' | 'cancelled' | 'gave-up'>('pending');
   const [data, setData] = useState<any>(null);
   const [startedAt] = useState(Date.now());
 
   useEffect(() => {
-    try { setBookingId(sessionStorage.getItem('notos_last_booking')); } catch {}
+    try {
+      setBookingId(sessionStorage.getItem('notos_last_booking'));
+      const raw = sessionStorage.getItem('notos_last_booking_data');
+      if (raw) setBookingData(JSON.parse(raw));
+    } catch {}
   }, []);
 
   useEffect(() => {
-    // Need at least one of the two to ask the server anything useful
     if (!bookingId && !orderCode) return;
 
     let stopped = false;
     let timer: any;
 
     const tick = async () => {
-      // Hard timeout — stop polling after 30s and show the "we got it, just
-      // verifying" fallback UI. The booking still completes server-side via
-      // the webhook; we just stop spinning at the user.
       if (Date.now() - startedAt > MAX_POLL_MS) {
         if (!stopped) setStatus('gave-up');
         return;
       }
 
       try {
-        const params = new URLSearchParams();
-        if (bookingId)  params.set('id', bookingId);
-        if (orderCode)  params.set('orderCode', orderCode);
-        const r = await fetch(`/api/booking/status?${params.toString()}`);
+        // POST so we can include the full booking data for notifications.
+        // The server needs this because the in-memory DB loses records
+        // across Vercel serverless invocations.
+        const r = await fetch('/api/booking/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId: bookingId,
+            orderCode: orderCode,
+            booking: bookingData // full booking details from sessionStorage
+          })
+        });
         if (r.ok) {
           const d = await r.json();
           if (stopped) return;
           setData(d);
           if (d.status === 'paid') {
             setStatus('paid');
+            // Clear stored data
+            try { sessionStorage.removeItem('notos_last_booking_data'); } catch {}
             return;
           }
           if (d.status === 'cancelled') {
@@ -68,7 +79,7 @@ function SuccessContent() {
     };
     tick();
     return () => { stopped = true; if (timer) clearTimeout(timer); };
-  }, [bookingId, orderCode, startedAt]);
+  }, [bookingId, orderCode, bookingData, startedAt]);
 
   // ---- RENDER ---------------------------------------------------------
 

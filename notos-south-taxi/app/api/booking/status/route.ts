@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { checkOrderStatus } from '@/lib/integrations/viva';
 import { sendCustomerConfirmation, sendDriverNotification, type CustomerEmailPayload } from '@/lib/integrations/email';
+import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Helper: send both customer + driver emails. Fire-and-forget (don't
- * block the response if email fails — the customer still sees "paid").
+ * Helper: send customer email + driver email + driver WhatsApp.
+ * Fire-and-forget — don't block the response if any notification fails.
  */
 async function sendNotifications(row: any) {
   if (!row) return;
@@ -15,7 +16,7 @@ async function sendNotifications(row: any) {
     bookingRef: row.id,
     customerName: row.customerName ?? 'Customer',
     customerEmail: row.customerEmail ?? '',
-    customerPhone: row.customerPhone,
+    customerPhone: row.customerPhone ?? '',
     fromText: row.fromText ?? '',
     toText: row.toText ?? '',
     pickupAtIso: row.pickupAtIso ?? '',
@@ -31,7 +32,7 @@ async function sendNotifications(row: any) {
     locale: row.locale ?? 'en',
   };
 
-  // Only send if customer email is present
+  // 1. Customer confirmation email
   if (payload.customerEmail) {
     console.log('[status] Sending customer confirmation to', payload.customerEmail);
     await sendCustomerConfirmation(payload).catch(e =>
@@ -39,9 +40,33 @@ async function sendNotifications(row: any) {
     );
   }
 
-  console.log('[status] Sending driver notification');
+  // 2. Driver email
+  console.log('[status] Sending driver email notification');
   await sendDriverNotification(payload).catch(e =>
     console.error('[status] driver email failed:', e)
+  );
+
+  // 3. Driver WhatsApp via CallMeBot
+  console.log('[status] Sending driver WhatsApp via CallMeBot');
+  await notifyDriverNewBooking('', {
+    bookingRef: payload.bookingRef,
+    customerName: payload.customerName,
+    customerPhone: payload.customerPhone,
+    customerEmail: payload.customerEmail,
+    fromText: payload.fromText,
+    toText: payload.toText,
+    pickupAtIso: payload.pickupAtIso,
+    passengers: payload.passengers,
+    luggage: payload.luggage,
+    childSeats: payload.childSeats,
+    vehicle: payload.vehicle,
+    flightNumber: payload.flightNumber,
+    notes: payload.notes,
+    totalEUR: payload.totalEUR,
+    depositEUR: payload.depositEUR,
+    remainderEUR: payload.remainderEUR,
+  }).catch(e =>
+    console.error('[status] WhatsApp notification failed:', e)
   );
 }
 

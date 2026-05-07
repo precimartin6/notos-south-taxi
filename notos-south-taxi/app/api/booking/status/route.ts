@@ -51,7 +51,7 @@ async function sendNotifications(row: any) {
   await notifyDriverNewBooking('', {
     bookingRef: payload.bookingRef,
     customerName: payload.customerName,
-    customerPhone: payload.customerPhone,
+    customerPhone: payload.customerPhone ?? '',
     customerEmail: payload.customerEmail,
     fromText: payload.fromText,
     toText: payload.toText,

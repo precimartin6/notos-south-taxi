@@ -225,37 +225,37 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
 
 function buildDriverHtml(b: CustomerEmailPayload): string {
   const dt = new Date(b.pickupAtIso);
-  const dateStr = dt.toLocaleString('en-GB', {
+  const dateStr = dt.toLocaleString('el-GR', {
     dateStyle: 'full',
     timeStyle: 'short',
     timeZone: 'Europe/Athens',
   });
 
   const VEHICLE_LABELS: Record<string, string> = {
-    taxi: 'Standard Taxi', station_wagon: 'Station Wagon', van: 'Van (up to 8)', coach: 'Minibus / Coach',
+    taxi: 'Ταξί', station_wagon: 'Station Wagon', van: 'Van (έως 8 άτομα)', coach: 'Πούλμαν',
   };
 
   const rows = [
-    row('Booking ref',       b.bookingRef,                          false),
-    row('Pickup',            dateStr,                               true),
-    row('From',              b.fromText,                            false),
-    row('To',                b.toText,                              true),
-    row('Vehicle',           VEHICLE_LABELS[b.vehicle] ?? b.vehicle, false),
-    row('Passengers',        b.passengers,                          true),
-    row('Luggage',           b.luggage,                             false),
-    ...(b.childSeats > 0    ? [row('Child seats',   b.childSeats,   true)]  : []),
-    ...(b.flightNumber      ? [row('Flight',         b.flightNumber, false)] : []),
-    ...(b.notes             ? [row('Notes',          b.notes,        true)]  : []),
-    row('Customer',          b.customerName,                        false),
-    row('Phone',             b.customerPhone ?? '',                 true),
-    row('Email',             b.customerEmail,                       false),
-    row('Deposit paid',      `€${b.depositEUR.toFixed(2)}`,         true),
-    row('Cash on arrival',   `€${b.remainderEUR.toFixed(2)}`,       false),
-    row('Total',             `€${b.totalEUR.toFixed(2)}`,           true),
+    row('Κωδ. κράτησης',    b.bookingRef,                          false),
+    row('Παραλαβή',         dateStr,                               true),
+    row('Από',              b.fromText,                            false),
+    row('Προς',             b.toText,                              true),
+    row('Όχημα',            VEHICLE_LABELS[b.vehicle] ?? b.vehicle, false),
+    row('Επιβάτες',         b.passengers,                          true),
+    row('Αποσκευές',        b.luggage,                             false),
+    ...(b.childSeats > 0   ? [row('Παιδικά καθίσματα', b.childSeats, true)]  : []),
+    ...(b.flightNumber     ? [row('Πτήση',              b.flightNumber, false)] : []),
+    ...(b.notes            ? [row('Σημειώσεις',         b.notes,        true)]  : []),
+    row('Πελάτης',          b.customerName,                        false),
+    row('Τηλέφωνο',         b.customerPhone ?? '',                 true),
+    row('Email',            b.customerEmail,                       false),
+    row('Προκαταβολή',      `€${b.depositEUR.toFixed(2)}`,         true),
+    row('Υπόλοιπο μετρητά', `€${b.remainderEUR.toFixed(2)}`,       false),
+    row('Σύνολο',           `€${b.totalEUR.toFixed(2)}`,           true),
   ].join('\n');
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f0f0f0;font-family:Arial,Helvetica,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:32px 0;">
@@ -263,8 +263,8 @@ function buildDriverHtml(b: CustomerEmailPayload): string {
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
         <tr>
           <td style="background:#1e3a5f;padding:28px 32px;text-align:center;">
-            <p style="margin:0;color:#f8d347;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Notos South Taxi — Driver</p>
-            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">🚖 New Booking Paid</h1>
+            <p style="margin:0;color:#f8d347;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Notos South Taxi — Οδηγός</p>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">🚖 Νέα Κράτηση Πληρώθηκε</h1>
           </td>
         </tr>
         <tr>

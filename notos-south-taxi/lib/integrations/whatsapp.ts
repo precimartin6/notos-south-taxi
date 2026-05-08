@@ -33,31 +33,35 @@ export interface BookingPayload {
 
 function formatBookingMessage(b: BookingPayload): string {
   const dt = new Date(b.pickupAtIso);
-  const date = dt.toLocaleString('en-GB', {
+  const date = dt.toLocaleString('el-GR', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'Europe/Athens'
   });
 
+  const VEHICLE_LABELS: Record<string, string> = {
+    taxi: 'Ταξί', station_wagon: 'Station Wagon', van: 'Van (έως 8)', coach: 'Πούλμαν',
+  };
+
   return [
-    `🚖 *NEW BOOKING* — ${b.bookingRef}`,
+    `🚖 *ΝΕΑ ΚΡΑΤΗΣΗ* — ${b.bookingRef}`,
     ``,
-    `*Pickup:* ${date}`,
-    `*From:* ${b.fromText}`,
-    `*To:* ${b.toText}`,
+    `*Παραλαβή:* ${date}`,
+    `*Από:* ${b.fromText}`,
+    `*Προς:* ${b.toText}`,
     ``,
-    `*Customer:* ${b.customerName}`,
-    `*Phone:* ${b.customerPhone}`,
+    `*Πελάτης:* ${b.customerName}`,
+    `*Τηλέφωνο:* ${b.customerPhone}`,
     `*Email:* ${b.customerEmail}`,
-    b.flightNumber ? `*Flight:* ${b.flightNumber}` : '',
+    b.flightNumber ? `*Πτήση:* ${b.flightNumber}` : '',
     ``,
-    `*Vehicle:* ${b.vehicle}`,
-    `*Passengers:* ${b.passengers} | *Luggage:* ${b.luggage} | *Child seats:* ${b.childSeats}`,
-    b.notes ? `*Notes:* ${b.notes}` : '',
+    `*Όχημα:* ${VEHICLE_LABELS[b.vehicle] ?? b.vehicle}`,
+    `*Επιβάτες:* ${b.passengers} | *Αποσκευές:* ${b.luggage} | *Παιδικά καθίσματα:* ${b.childSeats}`,
+    b.notes ? `*Σημειώσεις:* ${b.notes}` : '',
     ``,
-    `*Total:* €${b.totalEUR.toFixed(2)}`,
-    `*Booking fee paid:* €${b.depositEUR.toFixed(2)}`,
-    `*Cash on arrival:* €${b.remainderEUR.toFixed(2)}`
+    `*Σύνολο:* €${b.totalEUR.toFixed(2)}`,
+    `*Προκαταβολή online:* €${b.depositEUR.toFixed(2)}`,
+    `*Υπόλοιπο σε μετρητά:* €${b.remainderEUR.toFixed(2)}`
   ]
     .filter(Boolean)
     .join('\n');

@@ -78,9 +78,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'missing_id_or_orderCode' }, { status: 400 });
   }
 
-  // Try DB first
+  // Try DB — first by bookingId, then by Viva order code
   let row = bookingId ? await db.getById(bookingId) : null;
-  console.log('[status POST] db row found:', !!row);
+  if (!row && orderCode) {
+    row = await db.getByVivaOrder(Number(orderCode));
+    console.log('[status POST] db lookup by orderCode:', !!row);
+  }
+  console.log('[status POST] db row found:', !!row, row?.id ?? null);
 
   if (row && row.status === 'paid') {
     return NextResponse.json({ id: row.id, status: 'paid', totalEUR: row.totalEUR, depositEUR: row.depositEUR, remainderEUR: row.remainderEUR, source: 'db' });
@@ -88,10 +92,20 @@ export async function POST(req: NextRequest) {
 
   // Check Viva — try transaction ID first (most reliable), fall back to order code
   let vivaStatus: 'paid' | 'pending' | 'failed' | 'unknown' = 'unknown';
+  let merchantTrns: string | undefined;
 
   if (transactionId) {
-    vivaStatus = await checkTransactionStatus(transactionId);
-    console.log('[status POST] transaction check result:', vivaStatus);
+    const txResult = await checkTransactionStatus(transactionId);
+    vivaStatus = txResult.status;
+    merchantTrns = txResult.merchantTrns;
+    console.log('[status POST] transaction check result:', vivaStatus, 'merchantTrns:', merchantTrns);
+
+    // merchantTrns is the booking ID we set when creating the order
+    // Use it to find the booking in KV if we don't have it yet
+    if (!row && merchantTrns && merchantTrns.startsWith('NST-')) {
+      row = await db.getById(merchantTrns);
+      console.log('[status POST] db lookup by merchantTrns:', !!row, merchantTrns);
+    }
   }
 
   if (vivaStatus === 'unknown' || vivaStatus === 'pending') {
@@ -103,14 +117,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  console.log('[status POST] final status:', vivaStatus);
+  console.log('[status POST] final status:', vivaStatus, 'row found:', !!row);
 
   if (vivaStatus === 'paid') {
-      if (row) {
-        await db.setStatus(row.id, 'paid', { notifiedAt: new Date().toISOString() });
+    if (row) {
+      // If already marked paid and notified, don't send duplicate notifications
+      if (row.status === 'paid' && row.notifiedAt) {
+        console.log('[status POST] already notified, skipping');
+        return NextResponse.json({ id: row.id, status: 'paid', totalEUR: row.totalEUR, depositEUR: row.depositEUR, remainderEUR: row.remainderEUR, source: 'db-cached' });
       }
+      await db.setStatus(row.id, 'paid', { notifiedAt: new Date().toISOString() });
+    }
 
-      const src = row || booking || {};
+    const src = row || booking || {};
+    console.log('[status POST] src.customerEmail:', src.customerEmail, 'src keys:', Object.keys(src));
 
       if (src.customerEmail) {
         const payload: CustomerEmailPayload = {

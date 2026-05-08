@@ -15,7 +15,6 @@ export default async function BookingPage({
   // Provide localized destination options to the client form
   const destOptions = [
   // TEMPORARY — remove after payment verification
-  { slug: 'test-payment', label: '[TEST] Payment verification €0.50' },
   { slug: 'airport', label: locale === 'el' ? 'Αεροδρόμιο Αθηνών' : 'Athens Airport' },
   { slug: 'athens-centre', label: locale === 'el' ? 'Κέντρο Αθηνών' : 'Athens City Centre' },
   { slug: 'piraeus-port', label: locale === 'el' ? 'Λιμάνι Πειραιά' : 'Piraeus Port' },

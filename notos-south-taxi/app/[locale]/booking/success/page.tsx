@@ -16,9 +16,8 @@ function SuccessContent() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
 
-  // Viva can hand the orderCode back under several names depending on which
-  // success URL template was set up in the merchant dashboard.
-  const orderCode = sp.get('s') || sp.get('orderCode') || sp.get('t') || sp.get('OrderCode');
+  const orderCode = sp.get('s') || sp.get('orderCode') || sp.get('OrderCode');
+  const transactionId = sp.get('t'); // Viva transaction UUID — most reliable for status check
 
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [bookingData, setBookingData] = useState<any>(null);
@@ -35,7 +34,7 @@ function SuccessContent() {
   }, []);
 
   useEffect(() => {
-    if (!bookingId && !orderCode) return;
+    if (!bookingId && !orderCode && !transactionId) return;
 
     let stopped = false;
     let timer: any;
@@ -47,16 +46,14 @@ function SuccessContent() {
       }
 
       try {
-        // POST so we can include the full booking data for notifications.
-        // The server needs this because the in-memory DB loses records
-        // across Vercel serverless invocations.
         const r = await fetch('/api/booking/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            bookingId: bookingId,
-            orderCode: orderCode,
-            booking: bookingData // full booking details from sessionStorage
+            bookingId,
+            orderCode,
+            transactionId, // the t= UUID from Viva — most reliable
+            booking: bookingData
           })
         });
         if (r.ok) {
@@ -79,7 +76,7 @@ function SuccessContent() {
     };
     tick();
     return () => { stopped = true; if (timer) clearTimeout(timer); };
-  }, [bookingId, orderCode, bookingData, startedAt]);
+  }, [bookingId, orderCode, transactionId, bookingData, startedAt]);
 
   // ---- RENDER ---------------------------------------------------------
 

@@ -218,8 +218,8 @@ export async function checkOrderStatus(orderCode: number | string): Promise<'pai
  * This is more reliable than the order lookup for confirming payment.
  * statusId "F" = Finished (paid), "E" = Error, "A" = Authorized, "X" = Refunded
  */
-export async function checkTransactionStatus(transactionId: string): Promise<'paid' | 'pending' | 'failed' | 'unknown'> {
-  if (!CLIENT_ID || !CLIENT_SECRET || !transactionId) return 'unknown';
+export async function checkTransactionStatus(transactionId: string): Promise<{ status: 'paid' | 'pending' | 'failed' | 'unknown'; merchantTrns?: string }> {
+  if (!CLIENT_ID || !CLIENT_SECRET || !transactionId) return { status: 'unknown' };
 
   try {
     const token = await getAccessToken();
@@ -237,20 +237,22 @@ export async function checkTransactionStatus(transactionId: string): Promise<'pa
 
     if (!res.ok) {
       console.warn('[viva] transaction lookup failed:', res.status);
-      return 'unknown';
+      return { status: 'unknown' };
     }
 
     const tx = JSON.parse(rawBody);
     const statusId = tx.statusId ?? tx.StatusId;
-    console.log('[viva] transaction statusId:', statusId);
+    // merchantTrns is our booking ID — use it to look up the booking in KV
+    const merchantTrns = tx.merchantTrns ?? tx.MerchantTrns;
+    console.log('[viva] transaction statusId:', statusId, 'merchantTrns:', merchantTrns);
 
-    if (statusId === 'F') return 'paid';
-    if (statusId === 'E' || statusId === 'X') return 'failed';
-    if (statusId === 'A') return 'pending'; // authorized but not captured
+    if (statusId === 'F') return { status: 'paid', merchantTrns };
+    if (statusId === 'E' || statusId === 'X') return { status: 'failed', merchantTrns };
+    if (statusId === 'A') return { status: 'pending', merchantTrns };
 
-    return 'pending';
+    return { status: 'pending', merchantTrns };
   } catch (err) {
     console.warn('[viva] transaction check threw:', err);
-    return 'unknown';
+    return { status: 'unknown' };
   }
 }

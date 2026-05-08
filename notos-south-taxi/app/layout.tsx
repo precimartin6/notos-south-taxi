@@ -39,10 +39,10 @@ export const metadata: Metadata = {
       'Licensed Athens taxi based on the Riviera. Fixed prices, on time, every time.',
     images: [
       {
-        url: '/photos/fleet/taxi-1.jpg',
-        width: 1400,
-        height: 933,
-        alt: 'Notos South Taxi — yellow Mercedes E-Class at the Acropolis'
+        url: `${SITE_URL}/og-banner.jpg`,
+        width: 1535,
+        height: 688,
+        alt: 'Notos South Taxi — Athens taxi with Acropolis'
       }
     ]
   },
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: 'Notos South Taxi — Athens transfers & private taxi tours',
     description:
       'Licensed Athens taxi based on the Riviera. Fixed prices, on time, every time.',
-    images: ['/photos/fleet/taxi-1.jpg']
+    images: [`${SITE_URL}/og-banner.jpg`]
   },
   robots: { index: true, follow: true }
 };

@@ -10,7 +10,17 @@
  */
 
 const ACCOUNTS_URL  = (process.env.VIVA_ACCOUNTS_URL  || 'https://demo-accounts.vivapayments.com').replace(/\/$/, '');
-const API_URL       = (process.env.VIVA_BASE_URL       || 'https://demo.vivapayments.com').replace(/\/$/, '');
+// API calls (create order, check status) use api.vivapayments.com for live
+// or demo.vivapayments.com for demo
+const API_URL       = (process.env.VIVA_API_URL || (
+  process.env.VIVA_BASE_URL?.includes('demo')
+    ? 'https://demo.vivapayments.com'
+    : 'https://api.vivapayments.com'
+)).replace(/\/$/, '');
+// Checkout page (where customer pays) is always www.vivapayments.com for live
+const CHECKOUT_URL  = process.env.VIVA_BASE_URL?.includes('demo')
+  ? 'https://demo.vivapayments.com'
+  : 'https://www.vivapayments.com';
 const CLIENT_ID     = process.env.VIVA_CLIENT_ID      || '';
 const CLIENT_SECRET = process.env.VIVA_CLIENT_SECRET  || '';
 const SOURCE_CODE   = process.env.VIVA_SOURCE_CODE    || '';
@@ -132,13 +142,9 @@ export async function createPaymentOrder(input: CreateOrderInput): Promise<Creat
 
   // Derive checkout domain from the same env-configured API URL so demo and
   // production both point to the correct Viva checkout page.
-  const checkoutBase = API_URL.includes('demo')
-    ? 'https://demo.vivapayments.com'
-    : 'https://www.vivapayments.com';
-
   return {
     orderCode:   data.orderCode,
-    checkoutUrl: `${checkoutBase}/web/checkout?ref=${data.orderCode}`,
+    checkoutUrl: `${CHECKOUT_URL}/web/checkout?ref=${data.orderCode}`,
   };
 }  
 

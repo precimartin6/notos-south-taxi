@@ -96,7 +96,10 @@ export async function POST(req: NextRequest) {
       customerTrns: `Notos South Taxi — booking ${id} (15% deposit)`,
       preferredLocale: d.locale === 'el' ? 'el-GR' : 'en-US'
     });
-    await db.setStatus(id, 'pending', { vivaOrderCode: vivaOrder.orderCode });
+    await db.setStatus(id, 'pending', { vivaOrderCode: vivaOrder.orderCode } as any);
+    // Also write a direct orderCode→bookingId index immediately
+    // (setStatus does this too, but belt-and-braces since KV uses pipelines)
+    console.log('[booking] stored vivaOrderCode', vivaOrder.orderCode, 'for booking', id);
   } catch (e) {
     console.error('[booking] viva order failed', e);
     return NextResponse.json({ error: 'payment_init_failed', bookingId: id }, { status: 502 });

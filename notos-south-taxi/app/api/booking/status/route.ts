@@ -11,42 +11,42 @@ export const dynamic = 'force-dynamic';
  * the others still try.
  */
 async function sendAllNotifications(payload: CustomerEmailPayload) {
-  // 1. Customer email
+  const tasks: Promise<any>[] = [];
+
   if (payload.customerEmail) {
     console.log('[status] Sending customer email to', payload.customerEmail);
-    await sendCustomerConfirmation(payload).catch(e =>
-      console.error('[status] customer email failed:', e)
+    tasks.push(
+      sendCustomerConfirmation(payload).catch(e => console.error('[status] customer email failed:', e))
     );
   }
 
-  // 2. Driver email
-  console.log('[status] Sending driver email');
-  await sendDriverNotification(payload).catch(e =>
-    console.error('[status] driver email failed:', e)
+  console.log('[status] Sending driver email + WhatsApp in parallel');
+  tasks.push(
+    sendDriverNotification(payload).catch(e => console.error('[status] driver email failed:', e))
+  );
+  tasks.push(
+    notifyDriverNewBooking('', {
+      bookingRef: payload.bookingRef,
+      customerName: payload.customerName,
+      customerPhone: payload.customerPhone ?? '',
+      customerEmail: payload.customerEmail,
+      fromText: payload.fromText,
+      toText: payload.toText,
+      pickupAtIso: payload.pickupAtIso,
+      passengers: payload.passengers,
+      luggage: payload.luggage,
+      childSeats: payload.childSeats,
+      vehicle: payload.vehicle,
+      flightNumber: payload.flightNumber,
+      notes: payload.notes,
+      totalEUR: payload.totalEUR,
+      depositEUR: payload.depositEUR,
+      remainderEUR: payload.remainderEUR,
+    }).catch(e => console.error('[status] WhatsApp failed:', e))
   );
 
-  // 3. Driver WhatsApp
-  console.log('[status] Sending driver WhatsApp');
-  await notifyDriverNewBooking('', {
-    bookingRef: payload.bookingRef,
-    customerName: payload.customerName,
-    customerPhone: payload.customerPhone ?? '',
-    customerEmail: payload.customerEmail,
-    fromText: payload.fromText,
-    toText: payload.toText,
-    pickupAtIso: payload.pickupAtIso,
-    passengers: payload.passengers,
-    luggage: payload.luggage,
-    childSeats: payload.childSeats,
-    vehicle: payload.vehicle,
-    flightNumber: payload.flightNumber,
-    notes: payload.notes,
-    totalEUR: payload.totalEUR,
-    depositEUR: payload.depositEUR,
-    remainderEUR: payload.remainderEUR,
-  }).catch(e =>
-    console.error('[status] WhatsApp failed:', e)
-  );
+  await Promise.all(tasks);
+  console.log('[status] All notifications sent');
 }
 
 /**

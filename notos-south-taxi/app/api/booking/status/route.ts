@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { checkOrderStatus } from '@/lib/integrations/viva';
+import { checkOrderStatus, checkTransactionStatus } from '@/lib/integrations/viva';
 import { sendCustomerConfirmation, sendDriverNotification, type CustomerEmailPayload } from '@/lib/integrations/email';
 import { notifyDriverNewBooking } from '@/lib/integrations/whatsapp';
 
@@ -65,48 +65,56 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid_body' }, { status: 400 });
   }
 
-  const { bookingId, orderCode, booking } = body as {
+  const { bookingId, orderCode, transactionId, booking } = body as {
     bookingId?: string;
     orderCode?: string | number;
-    booking?: any; // The full booking data from the client
+    transactionId?: string;
+    booking?: any;
   };
 
-  if (!bookingId && !orderCode) {
+  console.log('[status POST] bookingId:', bookingId, 'orderCode:', orderCode, 'transactionId:', transactionId, 'hasBooking:', !!booking);
+
+  if (!bookingId && !orderCode && !transactionId) {
     return NextResponse.json({ error: 'missing_id_or_orderCode' }, { status: 400 });
   }
 
-  // Try DB first (in case we're lucky and same Lambda)
+  // Try DB first
   let row = bookingId ? await db.getById(bookingId) : null;
+  console.log('[status POST] db row found:', !!row);
 
   if (row && row.status === 'paid') {
-    return NextResponse.json({
-      id: row.id,
-      status: 'paid',
-      totalEUR: row.totalEUR,
-      depositEUR: row.depositEUR,
-      remainderEUR: row.remainderEUR,
-      source: 'db'
-    });
+    return NextResponse.json({ id: row.id, status: 'paid', totalEUR: row.totalEUR, depositEUR: row.depositEUR, remainderEUR: row.remainderEUR, source: 'db' });
   }
 
-  // Ask Viva directly
-  const codeForViva = row?.vivaOrderCode ?? orderCode;
-  if (codeForViva) {
-    const vivaStatus = await checkOrderStatus(codeForViva);
-    console.log('[status] Viva check for', codeForViva, '→', vivaStatus);
+  // Check Viva — try transaction ID first (most reliable), fall back to order code
+  let vivaStatus: 'paid' | 'pending' | 'failed' | 'unknown' = 'unknown';
 
-    if (vivaStatus === 'paid') {
+  if (transactionId) {
+    vivaStatus = await checkTransactionStatus(transactionId);
+    console.log('[status POST] transaction check result:', vivaStatus);
+  }
+
+  if (vivaStatus === 'unknown' || vivaStatus === 'pending') {
+    const codeForViva = row?.vivaOrderCode ?? orderCode;
+    if (codeForViva) {
+      const orderStatus = await checkOrderStatus(codeForViva);
+      console.log('[status POST] order check result:', orderStatus);
+      if (orderStatus !== 'unknown') vivaStatus = orderStatus;
+    }
+  }
+
+  console.log('[status POST] final status:', vivaStatus);
+
+  if (vivaStatus === 'paid') {
       if (row) {
         await db.setStatus(row.id, 'paid', { notifiedAt: new Date().toISOString() });
       }
 
-      // Build notification payload from either the DB row or client-provided data
       const src = row || booking || {};
-      const notifSent = !!src.customerEmail; // only send if we have enough data
-      
+
       if (src.customerEmail) {
         const payload: CustomerEmailPayload = {
-          bookingRef: src.id || bookingId || `VC-${codeForViva}`,
+          bookingRef: src.id || bookingId || `VC-${transactionId || orderCode}`,
           customerName: src.customerName || 'Customer',
           customerEmail: src.customerEmail || '',
           customerPhone: src.customerPhone || '',
@@ -124,30 +132,23 @@ export async function POST(req: NextRequest) {
           remainderEUR: src.remainderEUR ?? 0,
           locale: src.locale || 'en',
         };
-
         await sendAllNotifications(payload);
       } else {
-        console.warn('[status] Payment confirmed but no booking data available — cannot send notifications');
+        console.warn('[status POST] paid but no customer email — cannot send notifications. booking keys:', Object.keys(src));
       }
 
       return NextResponse.json({
         id: row?.id ?? bookingId ?? null,
         status: 'paid',
-        totalEUR: src.totalEUR ?? null,
-        depositEUR: src.depositEUR ?? null,
-        remainderEUR: src.remainderEUR ?? null,
-        notified: notifSent,
+        totalEUR: (row || booking)?.totalEUR ?? null,
+        depositEUR: (row || booking)?.depositEUR ?? null,
+        remainderEUR: (row || booking)?.remainderEUR ?? null,
         source: 'viva-direct'
       });
-    }
+  }
 
-    if (vivaStatus === 'failed') {
-      return NextResponse.json({
-        id: row?.id ?? bookingId ?? null,
-        status: 'cancelled',
-        source: 'viva-direct'
-      });
-    }
+  if (vivaStatus === 'failed') {
+    return NextResponse.json({ id: row?.id ?? bookingId ?? null, status: 'cancelled', source: 'viva-direct' });
   }
 
   return NextResponse.json({

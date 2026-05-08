@@ -129,7 +129,6 @@ function lookupFixedRoute(from?: string, to?: string): FixedRoutePrice | null {
 
 export function quote(req: QuoteRequest): QuoteResult {
   // ── TEMPORARY TEST ROUTE — remove after payment verification ──────────────
-  if (req.fromSlug === 'test-payment' || req.toSlug === 'test-payment') {
     return {
       totalEUR: 0.04,
       depositEUR: 0.04,

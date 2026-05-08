@@ -162,14 +162,26 @@ export function verifyWebhook(_payload: unknown): boolean {
  * 'failed' if it was attempted and failed, 'unknown' on errors.
  */
 export async function checkOrderStatus(orderCode: number | string): Promise<'paid' | 'pending' | 'failed' | 'unknown'> {
-  if (!CLIENT_ID || !CLIENT_SECRET) return 'unknown';
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.warn('[viva] missing credentials');
+    return 'unknown';
+  }
 
   try {
     const token = await getAccessToken();
 
-    // Step 1: Retrieve the order to see if it has been paid.
-    // GET /checkout/v2/orders/{orderCode} returns the order object.
-    const orderRes = await fetch(`${API_URL}/checkout/v2/orders/${orderCode}`, {
+    // The orderCode from the success URL (?s=...) is a 16-digit number.
+    // We use the transactions endpoint filtered by orderCode.
+    // Correct live URL: https://api.vivapayments.com/checkout/v2/transactions/{transactionId}
+    // BUT we don't have the transactionId here, only orderCode.
+    // Use the order retrieval endpoint instead:
+    // GET https://api.vivapayments.com/checkout/v2/orders/{orderCode}
+    // This requires the redirect-checkout OAuth scope.
+
+    const url = `${API_URL}/checkout/v2/orders/${orderCode}`;
+    console.log('[viva] checking order at:', url);
+
+    const orderRes = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -178,35 +190,67 @@ export async function checkOrderStatus(orderCode: number | string): Promise<'pai
       cache: 'no-store',
     });
 
+    const rawBody = await orderRes.text();
+    console.log('[viva] order lookup status:', orderRes.status, 'body:', rawBody.slice(0, 200));
+
     if (!orderRes.ok) {
-      console.warn('[viva] order lookup failed:', orderRes.status, await orderRes.text().catch(() => ''));
+      console.warn('[viva] order lookup failed:', orderRes.status);
       return 'unknown';
     }
 
-    const order = await orderRes.json();
-    console.log('[viva] order lookup result:', JSON.stringify({
-      orderCode: order.orderCode,
-      stateId: order.stateId,
-      paymentAmount: order.paymentAmount,
-      requestAmount: order.requestAmount,
-    }));
+    const order = JSON.parse(rawBody);
+    console.log('[viva] order stateId:', order.stateId, 'paymentAmount:', order.paymentAmount);
 
-    // Viva order stateId values:
-    //   0 = Pending (not yet paid)
-    //   1 = Expired
-    //   2 = Canceled / Voided
-    //   3 = Paid (has at least one successful transaction)
-    // Some Viva API versions just check if paymentAmount > 0 to mean paid.
-
+    // stateId 3 = paid, 1 = expired, 2 = cancelled
     if (order.stateId === 3 || order.stateId === '3') return 'paid';
-    if (order.stateId === 2 || order.stateId === '2' || order.stateId === 1 || order.stateId === '1') return 'failed';
-
-    // Also check: if paymentAmount > 0, money was collected = paid.
+    if (order.stateId === 2 || order.stateId === 1) return 'failed';
     if (typeof order.paymentAmount === 'number' && order.paymentAmount > 0) return 'paid';
 
     return 'pending';
   } catch (err) {
     console.warn('[viva] order status check threw:', err);
+    return 'unknown';
+  }
+}
+
+/**
+ * Check payment status using the transaction ID (the `t=` UUID in the success URL).
+ * This is more reliable than the order lookup for confirming payment.
+ * statusId "F" = Finished (paid), "E" = Error, "A" = Authorized, "X" = Refunded
+ */
+export async function checkTransactionStatus(transactionId: string): Promise<'paid' | 'pending' | 'failed' | 'unknown'> {
+  if (!CLIENT_ID || !CLIENT_SECRET || !transactionId) return 'unknown';
+
+  try {
+    const token = await getAccessToken();
+    const url = `${API_URL}/checkout/v2/transactions/${transactionId}`;
+    console.log('[viva] checking transaction at:', url);
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+
+    const rawBody = await res.text();
+    console.log('[viva] transaction status:', res.status, 'body:', rawBody.slice(0, 300));
+
+    if (!res.ok) {
+      console.warn('[viva] transaction lookup failed:', res.status);
+      return 'unknown';
+    }
+
+    const tx = JSON.parse(rawBody);
+    const statusId = tx.statusId ?? tx.StatusId;
+    console.log('[viva] transaction statusId:', statusId);
+
+    if (statusId === 'F') return 'paid';
+    if (statusId === 'E' || statusId === 'X') return 'failed';
+    if (statusId === 'A') return 'pending'; // authorized but not captured
+
+    return 'pending';
+  } catch (err) {
+    console.warn('[viva] transaction check threw:', err);
     return 'unknown';
   }
 }

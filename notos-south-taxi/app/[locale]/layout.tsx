@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import CookieBanner from '@/components/CookieBanner';
 import WhatsAppFab from '@/components/WhatsAppFab';
 
 export function generateStaticParams() {
@@ -28,7 +27,6 @@ export default async function LocaleLayout({
       <Header />
       <main className="min-h-[60vh]">{children}</main>
       <Footer />
-      <CookieBanner />
       <WhatsAppFab />
     </NextIntlClientProvider>
   );

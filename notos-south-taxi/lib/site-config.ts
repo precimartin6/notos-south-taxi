@@ -76,10 +76,6 @@ export function destImage(d: Destination): string {
 
 const ATH_AIRPORT = { lat: 37.9356, lng: 23.9484 };
 
-// Helper to build 3 Unsplash variants per destination using different keywords
-const u = (q: string, suffix = '') =>
-  `https://images.unsplash.com/${q}?auto=format&fit=crop&w=1400&q=80${suffix}`;
-
 export const DESTINATIONS: Destination[] = [
   {
     slug: 'patra',

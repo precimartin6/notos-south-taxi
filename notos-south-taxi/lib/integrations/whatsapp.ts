@@ -31,7 +31,7 @@ export interface BookingPayload {
   remainderEUR: number;
 }
 
-function formatBookingMessage(b: BookingPayload): string {
+function formatBookingMessage(b: BookingPayload, isUpdate = false): string {
   const dt = new Date(b.pickupAtIso);
   const date = dt.toLocaleString('el-GR', {
     dateStyle: 'medium',
@@ -44,7 +44,7 @@ function formatBookingMessage(b: BookingPayload): string {
   };
 
   return [
-    `🚖 *ΝΕΑ ΚΡΑΤΗΣΗ* — ${b.bookingRef}`,
+    `🚖 *${isUpdate ? 'ΕΝΗΜΕΡΩΣΗ ΚΡΑΤΗΣΗΣ' : 'ΝΕΑ ΚΡΑΤΗΣΗ'}* — ${b.bookingRef}`,
     ``,
     `*Παραλαβή:* ${date}`,
     `*Από:* ${b.fromText}`,
@@ -52,7 +52,10 @@ function formatBookingMessage(b: BookingPayload): string {
     ``,
     `*Πελάτης:* ${b.customerName}`,
     `*Τηλέφωνο:* ${b.customerPhone}`,
-    `*Email:* ${b.customerEmail}`,
+    // Customer email is intentionally omitted here: the driver doesn't need it
+    // to perform the pickup, and it keeps personal data out of the third-party
+    // CallMeBot relay (GDPR data minimisation). The full record, including
+    // email, is still in the driver email notification.
     b.flightNumber ? `*Πτήση:* ${b.flightNumber}` : '',
     ``,
     `*Όχημα:* ${VEHICLE_LABELS[b.vehicle] ?? b.vehicle}`,
@@ -69,7 +72,8 @@ function formatBookingMessage(b: BookingPayload): string {
 
 export async function notifyDriverNewBooking(
   _driverPhone: string,
-  b: BookingPayload
+  b: BookingPayload,
+  isUpdate = false
 ): Promise<void> {
   const phone = process.env.CALLMEBOT_PHONE;
   const apiKey = process.env.CALLMEBOT_API_KEY;
@@ -79,7 +83,7 @@ export async function notifyDriverNewBooking(
     return;
   }
 
-  const message = formatBookingMessage(b);
+  const message = formatBookingMessage(b, isUpdate);
   const url = `${BASE_URL}?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(message)}&apikey=${apiKey}`;
 
   try {

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { quote, vehicleNeedsAdvanceNotice, VAN_MIN_NOTICE_MINUTES } from '@/lib/pricing';
 import { createPaymentOrder } from '@/lib/integrations/viva';
 import { db, newBookingId } from '@/lib/db';
+import { rateLimit, clientIp, LIMITS } from '@/lib/ratelimit';
 
 const Schema = z.object({
   locale: z.enum(['en', 'el']),
@@ -28,6 +29,10 @@ const Schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(LIMITS.bookingCreate, clientIp(req)))) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = Schema.safeParse(body);
   if (!parsed.success) {

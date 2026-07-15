@@ -68,7 +68,29 @@ class Memory implements Adapter {
 
 // ─── Vercel KV adapter (production) ──────────────────────────────────────────
 
-const TTL_SECONDS = 60 * 60 * 24 * 60; // keep bookings for 60 days
+/**
+ * Operational personal data (name, contact, pickup/drop-off) is kept only until
+ * shortly after the trip, then auto-expires — this is what the privacy notice
+ * promises and what GDPR data-minimisation expects. KV can't range-scan, so we
+ * enforce retention with a per-booking TTL keyed off the pickup time rather than
+ * relying on the cleanup cron (which is a no-op under KV). Proof of payment lives
+ * in Viva Wallet for the tax-law period; we don't separately retain it here.
+ *
+ * RETENTION_BUFFER_SECONDS is the window kept after the scheduled pickup. Bump it
+ * if a longer operational window is needed for disputes/chargebacks — but keep it
+ * in sync with the "Retention" clause in messages/{en,el}.json.
+ */
+const RETENTION_BUFFER_SECONDS = 48 * 60 * 60;      // 48h after the scheduled pickup
+const MIN_TTL_SECONDS = 60 * 60;                    // never set a sub-hour TTL (lets final writes settle)
+const MAX_TTL_SECONDS = 400 * 24 * 60 * 60;         // sanity cap against malformed far-future dates
+
+/** Seconds to keep a booking: time until pickup, plus the retention buffer. */
+function ttlForPickup(pickupAtIso: string): number {
+  const pickupMs = new Date(pickupAtIso).getTime();
+  if (Number.isNaN(pickupMs)) return RETENTION_BUFFER_SECONDS;
+  const seconds = Math.round((pickupMs - Date.now()) / 1000) + RETENTION_BUFFER_SECONDS;
+  return Math.min(MAX_TTL_SECONDS, Math.max(MIN_TTL_SECONDS, seconds));
+}
 
 class KVAdapter implements Adapter {
   // kv is imported lazily to avoid crashing when the package isn't installed
@@ -79,9 +101,10 @@ class KVAdapter implements Adapter {
   }
 
   async insert(r: BookingRow) {
-    await this.kv.set(`booking:id:${r.id}`, r, { ex: TTL_SECONDS });
+    const ttl = ttlForPickup(r.pickupAtIso);
+    await this.kv.set(`booking:id:${r.id}`, r, { ex: ttl });
     if (r.vivaOrderCode != null) {
-      await this.kv.set(`booking:viva:${r.vivaOrderCode}`, r.id, { ex: TTL_SECONDS });
+      await this.kv.set(`booking:viva:${r.vivaOrderCode}`, r.id, { ex: ttl });
     }
   }
 
@@ -99,10 +122,13 @@ class KVAdapter implements Adapter {
     const row = await this.getById(id);
     if (!row) return;
     const updated: BookingRow = { ...row, ...patch, status };
-    await this.kv.set(`booking:id:${id}`, updated, { ex: TTL_SECONDS });
+    // Recompute TTL off the (possibly edited) pickup time so the retention
+    // window always tracks the current trip date.
+    const ttl = ttlForPickup(updated.pickupAtIso);
+    await this.kv.set(`booking:id:${id}`, updated, { ex: ttl });
     // index by viva order code if newly set
     if (updated.vivaOrderCode != null && row.vivaOrderCode == null) {
-      await this.kv.set(`booking:viva:${updated.vivaOrderCode}`, id, { ex: TTL_SECONDS });
+      await this.kv.set(`booking:viva:${updated.vivaOrderCode}`, id, { ex: ttl });
     }
   }
 

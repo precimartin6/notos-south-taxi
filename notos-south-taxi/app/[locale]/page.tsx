@@ -49,7 +49,9 @@ export default async function HomePage({ params: { locale } }: { params: { local
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Data is all static SITE config (no user input), but escape "<" as
+        // defence-in-depth so a stray value can never break out of the script tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       {/* HERO */}
       <section className="relative overflow-hidden">
@@ -220,24 +222,6 @@ function ServiceCard({ icon, title, body }: { icon: React.ReactNode; title: stri
       <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-notos-blue-deep text-notos-yellow">{icon}</div>
       <div className="mt-4 font-display text-lg font-bold text-notos-blue-deep">{title}</div>
       <p className="mt-1 text-sm text-notos-blue-deep/70">{body}</p>
-    </div>
-  );
-}
-
-function HeroCard({ locale }: { locale: Locale }) {
-  return (
-    <div className="relative overflow-hidden rounded-3xl bg-notos-blue-deep p-1 shadow-card">
-      <div className="relative h-[360px] w-full overflow-hidden rounded-[20px]">
-        <div
-          className="h-full w-full bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=1600&q=80)' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-notos-blue-deep via-notos-blue-deep/30 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-          <div className="text-xs uppercase tracking-[0.18em] text-notos-yellow">Athens · Sounion · Meteora</div>
-          <div className="mt-1 font-display text-2xl font-bold">{locale === 'el' ? 'Είστε στην Ελλάδα. Σας οδηγούμε εμείς.' : "You're in Greece. We'll drive."}</div>
-        </div>
-      </div>
     </div>
   );
 }

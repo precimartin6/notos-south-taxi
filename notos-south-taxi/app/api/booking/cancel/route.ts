@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { rateLimit, clientIp, LIMITS } from '@/lib/ratelimit';
 
 /**
  * Customer-facing cancellation. Free if more than 24h before pickup.
@@ -10,6 +11,10 @@ import { db } from '@/lib/db';
 const Schema = z.object({ id: z.string().min(1), email: z.string().email() });
 
 export async function POST(req: NextRequest) {
+  if (!(await rateLimit(LIMITS.bookingCancel, clientIp(req)))) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = Schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'invalid' }, { status: 400 });

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSearchParams, useParams } from 'next/navigation';
 import { CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import { SITE } from '@/lib/site-config';
+import EditBookingSection from '@/components/EditBookingSection';
 
 const MAX_POLL_MS = 30_000; // 30 seconds, then stop and show "verification pending" UI
 const POLL_INTERVAL_MS = 2000;
@@ -98,6 +99,10 @@ function SuccessContent() {
           <Link href={`/${locale}`} className="btn-primary mt-7">
             {t('booking.successCta')}
           </Link>
+
+          {bookingId && (
+            <EditBookingSection bookingId={bookingId} initialEmail={bookingData?.customerEmail} />
+          )}
         </div>
       </section>
     );

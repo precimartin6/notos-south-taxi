@@ -36,9 +36,12 @@ export interface CustomerEmailPayload {
 const T = {
   en: {
     subject: (ref: string) => `Booking Confirmed — ${ref} | Notos South Taxi`,
+    subjectUpdate: (ref: string) => `Booking Updated — ${ref} | Notos South Taxi`,
     heading: 'Booking Confirmed',
+    headingUpdate: 'Booking Updated',
     hi: (name: string) => `Dear ${name},`,
     intro: 'Your transfer has been confirmed and the driver has been notified. Here are your booking details:',
+    introUpdate: 'Your booking details have been updated and the driver has been notified. Here is the current version:',
     ref: 'Booking ref',
     pickup: 'Pickup date & time',
     from: 'From',
@@ -58,9 +61,12 @@ const T = {
   },
   el: {
     subject: (ref: string) => `Επιβεβαίωση Κράτησης — ${ref} | Notos South Taxi`,
+    subjectUpdate: (ref: string) => `Ενημέρωση Κράτησης — ${ref} | Notos South Taxi`,
     heading: 'Κράτηση Επιβεβαιώθηκε',
+    headingUpdate: 'Η Κράτηση Ενημερώθηκε',
     hi: (name: string) => `Αγαπητέ/ή ${name},`,
     intro: 'Η μεταφορά σας επιβεβαιώθηκε και ο οδηγός ειδοποιήθηκε. Παρακάτω είναι τα στοιχεία της κράτησής σας:',
+    introUpdate: 'Τα στοιχεία της κράτησής σας ενημερώθηκαν και ο οδηγός ειδοποιήθηκε. Δείτε την τρέχουσα έκδοση:',
     ref: 'Αριθμός κράτησης',
     pickup: 'Ημερομηνία & ώρα παραλαβής',
     from: 'Σημείο αναχώρησης',
@@ -97,7 +103,7 @@ function row(label: string, value: string | number, shade: boolean): string {
   </tr>`;
 }
 
-function buildHtml(b: CustomerEmailPayload): string {
+function buildHtml(b: CustomerEmailPayload, isUpdate = false): string {
   const locale = b.locale ?? 'en';
   const t = T[locale];
   const vLabel = VEHICLE_LABELS[b.vehicle]?.[locale] ?? b.vehicle;
@@ -137,7 +143,7 @@ function buildHtml(b: CustomerEmailPayload): string {
         <tr>
           <td style="background:#0f172a;padding:28px 32px;text-align:center;">
             <p style="margin:0;color:#f8d347;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Notos South Taxi</p>
-            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">✓ ${t.heading}</h1>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">✓ ${isUpdate ? t.headingUpdate : t.heading}</h1>
           </td>
         </tr>
 
@@ -145,7 +151,7 @@ function buildHtml(b: CustomerEmailPayload): string {
         <tr>
           <td style="padding:28px 32px 20px;">
             <p style="margin:0 0 8px;font-size:15px;color:#333;">${t.hi(b.customerName)}</p>
-            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">${t.intro}</p>
+            <p style="margin:0;font-size:15px;color:#555;line-height:1.6;">${isUpdate ? t.introUpdate : t.intro}</p>
           </td>
         </tr>
 
@@ -188,7 +194,7 @@ function buildHtml(b: CustomerEmailPayload): string {
 
 // ─── Send ─────────────────────────────────────────────────────────────────────
 
-export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise<void> {
+export async function sendCustomerConfirmation(b: CustomerEmailPayload, isUpdate = false): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const from   = process.env.RESEND_FROM_EMAIL ?? 'Notos South Taxi <onboarding@resend.dev>';
 
@@ -207,8 +213,8 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
     const { error } = await resend.emails.send({
       from,
       to:      b.customerEmail,
-      subject: t.subject(b.bookingRef),
-      html:    buildHtml(b),
+      subject: isUpdate ? t.subjectUpdate(b.bookingRef) : t.subject(b.bookingRef),
+      html:    buildHtml(b, isUpdate),
     });
 
     if (error) {
@@ -223,7 +229,7 @@ export async function sendCustomerConfirmation(b: CustomerEmailPayload): Promise
 
 // ─── Driver notification email ────────────────────────────────────────────────
 
-function buildDriverHtml(b: CustomerEmailPayload): string {
+function buildDriverHtml(b: CustomerEmailPayload, isUpdate = false): string {
   const dt = new Date(b.pickupAtIso);
   const dateStr = dt.toLocaleString('el-GR', {
     dateStyle: 'full',
@@ -264,7 +270,7 @@ function buildDriverHtml(b: CustomerEmailPayload): string {
         <tr>
           <td style="background:#1e3a5f;padding:28px 32px;text-align:center;">
             <p style="margin:0;color:#f8d347;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Notos South Taxi — Οδηγός</p>
-            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">🚖 Νέα Κράτηση Πληρώθηκε</h1>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:26px;font-weight:700;">🚖 ${isUpdate ? 'Ενημέρωση Κράτησης' : 'Νέα Κράτηση Πληρώθηκε'}</h1>
           </td>
         </tr>
         <tr>
@@ -286,7 +292,7 @@ function buildDriverHtml(b: CustomerEmailPayload): string {
 </html>`;
 }
 
-export async function sendDriverNotification(b: CustomerEmailPayload): Promise<void> {
+export async function sendDriverNotification(b: CustomerEmailPayload, isUpdate = false): Promise<void> {
   const apiKey      = process.env.RESEND_API_KEY;
   const from        = process.env.RESEND_FROM_EMAIL ?? 'Notos South Taxi <onboarding@resend.dev>';
   const driverEmail = process.env.DRIVER_EMAIL;
@@ -307,8 +313,10 @@ export async function sendDriverNotification(b: CustomerEmailPayload): Promise<v
     const { error } = await resend.emails.send({
       from,
       to:      driverEmail,
-      subject: `🚖 New booking ${b.bookingRef} — ${b.fromText} → ${b.toText}`,
-      html:    buildDriverHtml(b),
+      subject: isUpdate
+        ? `✏️ Booking updated ${b.bookingRef} — ${b.fromText} → ${b.toText}`
+        : `🚖 New booking ${b.bookingRef} — ${b.fromText} → ${b.toText}`,
+      html:    buildDriverHtml(b, isUpdate),
     });
 
     if (error) {

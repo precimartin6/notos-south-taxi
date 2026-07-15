@@ -6,6 +6,13 @@ const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
   localePrefix: 'always',
+  // Mark the NEXT_LOCALE cookie Secure in production (it holds only "en"/"el",
+  // so HttpOnly is not applicable and not needed). Not Secure in dev so local
+  // http still persists the choice.
+  localeCookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  },
 });
 
 /**
@@ -70,6 +77,7 @@ export default function middleware(req: NextRequest) {
       const res = NextResponse.redirect(url);
       res.cookies.set(BYPASS_COOKIE, expected, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 12 // 12 hours

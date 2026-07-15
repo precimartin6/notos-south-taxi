@@ -226,6 +226,54 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
   const [returnedFromPayment, setReturnedFromPayment] = useState(false);
   const vanNoticeRef = useRef<HTMLDivElement>(null);
 
+  // Hidden €0.10 test-booking trigger. Only visible with ?testbooking=1 in
+  // the URL, and the actual request still needs the secret key set in the
+  // TEST_BOOKING_SECRET env var — this just reveals the button.
+  const [showTestBooking, setShowTestBooking] = useState(false);
+  const [testSubmitting, setTestSubmitting] = useState(false);
+  useEffect(() => {
+    setShowTestBooking(new URLSearchParams(window.location.search).get('testbooking') === '1');
+  }, []);
+
+  async function submitTestBooking() {
+    setError(null);
+    if (!name || !email || !phone) {
+      setError('Fill in name, email and phone first (used for the test booking).');
+      return;
+    }
+    const key = window.prompt('Test booking secret key (TEST_BOOKING_SECRET):');
+    if (!key) return;
+    setTestSubmitting(true);
+    try {
+      const fromLabel = usingCustomFrom ? fromAddr : (destinations.find((d) => d.slug === fromSlug)?.label || fromSlug || 'Test origin');
+      const toLabel = usingCustomTo ? toAddr : (destinations.find((d) => d.slug === toSlug)?.label || toSlug || 'Test destination');
+      const r = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-test-key': key },
+        body: JSON.stringify({
+          ...payload(),
+          locale,
+          fromLabel,
+          toLabel,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
+          flightNumber: flightNumber || undefined,
+          notes: notes || undefined,
+          acceptedTerms: true,
+          acceptedPrivacy: true,
+          testBooking: true
+        })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'test_booking_failed');
+      window.location.href = data.checkoutUrl;
+    } catch (e: any) {
+      setError(e.message);
+      setTestSubmitting(false);
+    }
+  }
+
   const usingCustomFrom = fromSlug === CUSTOM;
   const usingCustomTo = toSlug === CUSTOM;
 
@@ -681,6 +729,17 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
         {t('submit')}
       </button>
       <p className="mt-3 text-center text-xs text-notos-blue-deep/50">{t('quote.bookingFeeNote')}</p>
+
+      {showTestBooking && (
+        <button
+          type="button"
+          onClick={submitTestBooking}
+          disabled={testSubmitting}
+          className="mt-3 w-full rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 py-2 text-xs font-semibold text-amber-800 disabled:opacity-60"
+        >
+          {testSubmitting ? 'Creating test order…' : '🧪 Run €0.10 test booking (skips normal pricing)'}
+        </button>
+      )}
     </form>
   );
 }

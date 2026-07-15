@@ -25,7 +25,8 @@ const Schema = z.object({
   flightNumber: z.string().optional(),
   notes: z.string().max(500).optional(),
   acceptedTerms: z.literal(true),
-  acceptedPrivacy: z.literal(true)
+  acceptedPrivacy: z.literal(true),
+  testBooking: z.literal(true).optional()
 });
 
 export async function POST(req: NextRequest) {
@@ -40,6 +41,19 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
+  // €0.10 test booking — used to verify the full Viva payment pipeline
+  // (order creation → checkout → webhook → notifications) with a real but
+  // tiny charge, instead of trusting a full deposit. Requires a secret key
+  // set in the TEST_BOOKING_SECRET env var; without it this path 403s.
+  const isTestBooking = d.testBooking === true;
+  if (isTestBooking) {
+    const provided = req.headers.get('x-test-key') || '';
+    const expected = process.env.TEST_BOOKING_SECRET || '';
+    if (!expected || provided !== expected) {
+      return NextResponse.json({ error: 'test_booking_unauthorized' }, { status: 403 });
+    }
+  }
+
   // Belt-and-braces: van/coach bookings need at least 1 hour notice.
   if (vehicleNeedsAdvanceNotice(d.vehicle)) {
     const minutesUntil = (new Date(d.pickupAtIso).getTime() - Date.now()) / 60000;
@@ -52,18 +66,26 @@ export async function POST(req: NextRequest) {
   }
 
   // recompute price server-side (never trust client)
-  const q = quote({
-    fromSlug: d.fromSlug,
-    toSlug: d.toSlug,
-    fromAddress: d.fromAddress,
-    toAddress: d.toAddress,
-    vehicle: d.vehicle,
-    passengers: d.passengers,
-    luggage: d.luggage,
-    bigLuggage: d.bigLuggage,
-    childSeats: d.childSeats,
-    pickupAtIso: d.pickupAtIso,
-  });
+  const q = isTestBooking
+    ? {
+        totalEUR: 0.10,
+        depositEUR: 0.10,
+        remainderEUR: 0,
+        breakdown: [{ label: 'TEST BOOKING — 10 cent payment test', amountEUR: 0.10 }],
+        source: 'fixed' as const
+      }
+    : quote({
+        fromSlug: d.fromSlug,
+        toSlug: d.toSlug,
+        fromAddress: d.fromAddress,
+        toAddress: d.toAddress,
+        vehicle: d.vehicle,
+        passengers: d.passengers,
+        luggage: d.luggage,
+        bigLuggage: d.bigLuggage,
+        childSeats: d.childSeats,
+        pickupAtIso: d.pickupAtIso,
+      });
 
   const id = newBookingId();
   const row = {
@@ -74,14 +96,14 @@ export async function POST(req: NextRequest) {
     customerName: d.customerName,
     customerEmail: d.customerEmail,
     customerPhone: d.customerPhone,
-    fromText: d.fromLabel,
-    toText: d.toLabel,
+    fromText: isTestBooking ? `[TEST] ${d.fromLabel}` : d.fromLabel,
+    toText: isTestBooking ? `[TEST] ${d.toLabel}` : d.toLabel,
     vehicle: d.vehicle,
     passengers: d.passengers,
     luggage: d.luggage,
     childSeats: d.childSeats,
     flightNumber: d.flightNumber,
-    notes: d.notes,
+    notes: isTestBooking ? `[TEST BOOKING — €0.10, ignore] ${d.notes || ''}`.trim() : d.notes,
     totalEUR: q.totalEUR,
     depositEUR: q.depositEUR,
     remainderEUR: q.remainderEUR,
@@ -98,7 +120,9 @@ export async function POST(req: NextRequest) {
       customerFullName: d.customerName,
       customerPhone: d.customerPhone,
       merchantTrns: id,
-      customerTrns: `Notos South Taxi — booking ${id} (15% deposit)`,
+      customerTrns: isTestBooking
+        ? `Notos South Taxi — TEST booking ${id} (€0.10, not a real fare)`
+        : `Notos South Taxi — booking ${id} (15% deposit)`,
       preferredLocale: d.locale === 'el' ? 'el-GR' : 'en-US'
     });
     await db.setStatus(id, 'pending', { vivaOrderCode: vivaOrder.orderCode } as any);

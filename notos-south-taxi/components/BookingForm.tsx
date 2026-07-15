@@ -267,6 +267,28 @@ export default function BookingForm({ locale, destinations, defaultFrom, default
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || 'test_booking_failed');
+      try { sessionStorage.setItem('notos_last_booking', data.bookingId); } catch {}
+      try {
+        sessionStorage.setItem('notos_last_booking_data', JSON.stringify({
+          id: data.bookingId,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
+          fromText: fromLabel,
+          toText: toLabel,
+          pickupAtIso: payload().pickupAtIso,
+          vehicle: payload().vehicle,
+          passengers: payload().passengers,
+          luggage: payload().luggage,
+          childSeats: payload().childSeats,
+          flightNumber: flightNumber || undefined,
+          notes: notes || undefined,
+          totalEUR: data.total,
+          depositEUR: data.deposit,
+          remainderEUR: data.remainder,
+          locale
+        }));
+      } catch {}
       window.location.href = data.checkoutUrl;
     } catch (e: any) {
       setError(e.message);
